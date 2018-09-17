@@ -1,0 +1,47 @@
+{
+    "configurations": [
+        {
+            "name": "STM32_Win",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/Core/Inc"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/Core/Inc"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F303xC"
+            ],
+            "compilerPath": "E:/GNU Tools ARM Embedded/7 2017-q4-major/bin",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "STM32_Mac",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "${workspaceFolder}"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F303xC"
+            ],
+            "compilerPath": "/usr/local/gcc-arm-none-eabi-7-2017-q4-major/bin",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
