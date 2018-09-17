@@ -58,7 +58,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "uart_util_hal.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -117,7 +117,8 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
+  UART_Util_Init(&huart1);
+  printf("Build: %s %s\r\n",__DATE__,__TIME__);
   /* USER CODE END 2 */
 
   /* Infinite loop */
