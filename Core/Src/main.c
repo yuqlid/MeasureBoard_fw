@@ -60,6 +60,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "uart_util_hal.h"
+#include "AMT23.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -121,6 +122,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   UART_Util_Init(&huart1);
   printf("Build: %s %s\r\n",__DATE__,__TIME__);
+  Encoder_Init(&hspi1, RES_12BIT);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,7 +133,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+    HAL_Delay(100);
+    printf("%d\n",GetAngle_raw());
   }
   /* USER CODE END 3 */
 
