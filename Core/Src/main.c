@@ -133,8 +133,8 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    HAL_Delay(100);
-    printf("%d\n",GetAngle_raw());
+    HAL_Delay(10);
+    printf("%04d\n",GetAngle_raw());
   }
   /* USER CODE END 3 */
 

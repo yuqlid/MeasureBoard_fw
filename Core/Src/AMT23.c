@@ -18,11 +18,13 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 }
 
 uint16_t GetAngle_raw(void){
-    uint16_t rxbuf = 0;
-    HAL_SPI_Receive(hspi_amt23, (uint8_t*)(rxbuf), 2, 100);
-
-    rxbuf = (0x3FFF&(rxbuf))>>resolition_shift;
-    return rxbuf;
+    uint8_t rxbuf[2];
+    uint16_t angleraw = 0;
+    HAL_SPI_Receive(hspi_amt23, rxbuf, 2, 100);
+    angleraw = 0x7FFF&((rxbuf[0]<<8)|rxbuf[1]);
+    angleraw >>= 3;
+    angleraw &= 0x0FFF;
+    return angleraw;
 }
 
 float GetAngle_deg(void){
