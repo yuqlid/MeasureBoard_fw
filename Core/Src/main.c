@@ -60,6 +60,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "uart_util_hal.h"
+#include "HEDL5540.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -125,13 +126,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HEDL5540_Encoder_Init(&htim2);
   while (1)
   {
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+    printf("%ld\n",GetCount_raw());
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 
@@ -200,7 +203,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+  if(GPIO_Pin == ENC_Z_Pin){
+    HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
+  }
+}
 /* USER CODE END 4 */
 
 /**
