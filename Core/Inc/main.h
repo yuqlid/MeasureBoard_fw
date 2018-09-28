@@ -67,6 +67,7 @@
 #define TACT2_GPIO_Port GPIOC
 #define ENC_Z_Pin GPIO_PIN_2
 #define ENC_Z_GPIO_Port GPIOA
+#define ENC_Z_EXTI_IRQn EXTI2_TSC_IRQn
 #define LED0_Pin GPIO_PIN_2
 #define LED0_GPIO_Port GPIOB
 #define LED1_Pin GPIO_PIN_12
