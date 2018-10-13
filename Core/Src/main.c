@@ -126,6 +126,7 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Infinite loop */
+  uint16_t angle_rawdata = 0;
   /* USER CODE BEGIN WHILE */
   while (1)
   {
@@ -134,7 +135,10 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
     HAL_Delay(10);
-    printf("%04d\n",GetAngle_raw());
+    angle_rawdata = GetAngle_raw();
+    //printb(angle_rawdata);
+    printf(",%04d\n",angle_rawdata);
+
   }
   /* USER CODE END 3 */
 
@@ -203,7 +207,12 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void printb(uint16_t v) {
+  #define CHAR_BIT 8
+  uint16_t mask = (int16_t)1 << (sizeof(v) * CHAR_BIT - 1);
+  do putch(mask & v ? '1' : '0');
+  while (mask >>= 1);
+}
 /* USER CODE END 4 */
 
 /**

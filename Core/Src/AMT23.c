@@ -6,6 +6,7 @@
  */
 
 #include "AMT23.h"
+#include "main.h"
 
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
@@ -18,9 +19,10 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 }
 
 uint16_t GetAngle_raw(void){
-    uint8_t rxbuf[2];
+    uint8_t rxbuf[2] = {0,0};
     uint16_t angleraw = 0;
     HAL_SPI_Receive(hspi_amt23, rxbuf, 2, 100);
+    printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
     angleraw = 0x7FFF&((rxbuf[0]<<8)|rxbuf[1]);
     angleraw >>= 3;
     angleraw &= 0x0FFF;
