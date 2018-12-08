@@ -59,6 +59,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "MeasurementBoard_v1.h"
 #include "uart_util_hal.h"
 #include "AMT23.h"
 /* USER CODE END Includes */
@@ -218,6 +219,8 @@ void _Error_Handler(char *file, int line)
   /* User can add his own implementation to report the HAL error return state */
   while(1)
   {
+    HAL_Delay(100);
+    LED_Toggle(LED0);
   }
   /* USER CODE END Error_Handler_Debug */
 }

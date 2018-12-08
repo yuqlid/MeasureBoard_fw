@@ -6,6 +6,7 @@
                 "path": [
                     "${workspaceFolder}",
                     "${workspaceFolder}/Core/Inc",
+                    "${workspaceFolder}/BSP",
                     "${workspaceFolder}/USB_DEVICE/App",
                     "${workspaceFolder}/USB_DEVICE/Target",
                     "${workspaceFolder}/Drivers/STM32F3xx_HAL_Driver/Inc",
@@ -23,6 +24,7 @@
             "includePath": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/BSP",
                 "${workspaceFolder}/USB_DEVICE/App",
                 "${workspaceFolder}/USB_DEVICE/Target",
                 "${workspaceFolder}/Drivers/STM32F3xx_HAL_Driver/Inc",

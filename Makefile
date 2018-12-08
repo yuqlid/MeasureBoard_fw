@@ -78,7 +78,8 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 Core/Src/uart_util_hal.c \
 Core/Src/syscalls.c \
 Core/Src/dma.c \
-Core/Src/AMT23.c
+Core/Src/AMT23.c \
+BSP/MeasurementBoard_v1.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -136,6 +137,7 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IBSP \
 -IUSB_DEVICE/App \
 -IUSB_DEVICE/Target \
 -IDrivers/STM32F3xx_HAL_Driver/Inc \
