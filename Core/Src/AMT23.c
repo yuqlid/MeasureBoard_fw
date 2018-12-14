@@ -21,9 +21,7 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 uint16_t GetAngle_raw(void){
     uint8_t rxbuf[3] = {0,0,0};
     uint16_t angleraw = 0;
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-    HAL_SPI_Receive(hspi_amt23, rxbuf, 3, 100);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+    HAL_SPI_Receive_DMA(hspi_amt23, rxbuf, 2);
     for(int8_t i = 0; i < 3; i++)printf(",%04d",rxbuf[i]);
     printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
     angleraw = 0x7FFF&((rxbuf[0]<<8)|rxbuf[1]);
