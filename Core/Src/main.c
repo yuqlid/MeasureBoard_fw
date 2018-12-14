@@ -128,7 +128,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    uint16_t angle_rawdata = 0;
+    uint16_t angle = 0;
     uint32_t send_buf = -2000;
     uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
     while (1)
@@ -138,10 +138,10 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
         HAL_Delay(10);
-        angle_rawdata = GetAngle_raw();
-        //printb(angle_rawdata);
+        UpdateAngle();
         RS485_Transmit(0x13, 0x00, (uint8_t *)&send_buf, sizeof(Data));
-        printf(",%04d\n",angle_rawdata);
+        angle = GetAngle_raw();
+        printf("%04d\n",angle);
 
     }
   /* USER CODE END 3 */
@@ -219,23 +219,21 @@ void printb(uint16_t v) {
 }
 
 void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size){
-  uint8_t ubSend = 0;
-  uint8_t parity = 0x00;
-  uint8_t Packet[6 + size];
-  Packet[0] = 0xFA;
-  Packet[1] = 0xAF;
-  Packet[2] = ID;
-  Packet[3] = addr;
-  Packet[4] = size;
-  for(uint8_t i = 0; i < size; i++){
-    Packet[i + 5] = TxData[i];
-  }
-  for(uint8_t i = 2; i < (5 + size); i++){
-    parity ^= Packet[i];
-  }
-  Packet[5 + size] = parity;
 
-    //HAL_UART_Transmit(&huart3, Packet, sizeof(Packet),100);
+    uint8_t ubSend = 0;
+    uint8_t parity = 0x00;
+    uint8_t Packet[6 + size];
+    Packet[0] = 0xFA;
+    Packet[1] = 0xAF;
+    Packet[2] = ID;
+    Packet[3] = addr;
+    Packet[4] = size;
+
+    for(uint8_t i = 0; i < size; i++)Packet[i + 5] = TxData[i];
+    for(uint8_t i = 2; i < (5 + size); i++)parity ^= Packet[i];
+
+    Packet[5 + size] = parity;
+
     HAL_UART_Transmit_DMA(&huart3, Packet, sizeof(Packet));
 
 }

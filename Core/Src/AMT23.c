@@ -11,9 +11,8 @@
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
 
-
 uint16_t angleraw = 0;
-uint8_t rxbuf[3] = {0,0,0};
+uint8_t rxbuf[2] = {0,0};
 
 void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_set){
 
@@ -25,13 +24,13 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 void UpdateAngle(void){
     HAL_SPI_Receive_IT(hspi_amt23, rxbuf, 2);
 }
+
 uint16_t GetAngle_raw(void){
     //uint8_t rxbuf[3] = {0,0,0};
     //uint16_t angleraw = 0;
     //HAL_SPI_Receive_IT(hspi_amt23, rxbuf, 2);
-    for(int8_t i = 0; i < 3; i++)printf(",%04d",rxbuf[i]);
-    printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
-    
+    //for(int8_t i = 0; i < 3; i++)printf(",%04d",rxbuf[i]);
+    //printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
     return angleraw;
 }
 
@@ -44,9 +43,9 @@ float GetANgle_rad(void){
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
-    angleraw = 0x7FFF&((rxbuf[0]<<8)|rxbuf[1]);
-    angleraw >>= 3;
-    angleraw &= 0x0FFF;
-    printf("%04d\n",angleraw);
 
+    angleraw = 0x0FFF&((rxbuf[0]<<5)|rxbuf[1]>>3);
+
+    //printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
+    //printf(",%04d\n",angleraw);
 }
