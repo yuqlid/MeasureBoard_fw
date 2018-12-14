@@ -58,6 +58,8 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+#define TIM17_PERIOD 50-1
+#define TIM17_PSC 7200-1
 
 #define DIP2_Pin GPIO_PIN_13
 #define DIP2_GPIO_Port GPIOC
