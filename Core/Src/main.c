@@ -135,9 +135,10 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
     HAL_Delay(10);
-    angle_rawdata = GetAngle_raw();
+    UpdateAngle();
+    //angle_rawdata = GetAngle_raw();
     //printb(angle_rawdata);
-    printf(",%04d\n",angle_rawdata);
+    //printf(",%04d\n",angle_rawdata);
 
   }
   /* USER CODE END 3 */
