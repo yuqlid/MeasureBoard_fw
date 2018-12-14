@@ -111,32 +111,32 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_DMA_Init();
-    MX_CAN_Init();
-    MX_SPI1_Init();
-    MX_I2C1_Init();
-    MX_TIM2_Init();
-    MX_USART1_UART_Init();
-    MX_USART3_UART_Init();
-    MX_USB_DEVICE_Init();
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_CAN_Init();
+  MX_SPI1_Init();
+  MX_I2C1_Init();
+  MX_TIM2_Init();
+  MX_USART1_UART_Init();
+  MX_USART3_UART_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
     UART_Util_Init(&huart1);
     printf("Build: %s %s\r\n",__DATE__,__TIME__);
     Encoder_Init(&hspi1, RES_12BIT);
   /* USER CODE END 2 */
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
     uint16_t angle_rawdata = 0;
     uint32_t send_buf = -2000;
     uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
     while (1)
     {
 
-    /* USER CODE END WHILE */
+  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+  /* USER CODE BEGIN 3 */
         HAL_Delay(10);
         angle_rawdata = GetAngle_raw();
         //printb(angle_rawdata);
@@ -144,7 +144,7 @@ int main(void)
         printf(",%04d\n",angle_rawdata);
 
     }
-    /* USER CODE END 3 */
+  /* USER CODE END 3 */
 
 }
 
@@ -235,7 +235,8 @@ void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size){
   }
   Packet[5 + size] = parity;
 
-    HAL_UART_Transmit(&huart3, Packet, sizeof(Packet),100);
+    //HAL_UART_Transmit(&huart3, Packet, sizeof(Packet),100);
+    HAL_UART_Transmit_DMA(&huart3, Packet, sizeof(Packet));
 
 }
 /* USER CODE END 4 */

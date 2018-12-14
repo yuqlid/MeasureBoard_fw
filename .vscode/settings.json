@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "uart_util_hal.h": "c"
+        "uart_util_hal.h": "c",
+        "main.h": "c"
     }
 }
