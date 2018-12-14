@@ -85,6 +85,7 @@
 
 /* USER CODE BEGIN Private defines */
 void printb(uint16_t v);
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

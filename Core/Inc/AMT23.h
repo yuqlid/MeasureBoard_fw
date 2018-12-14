@@ -13,6 +13,9 @@
 
 #include "spi.h"
 
+
+//extern uint16_t angleraw;
+
 typedef enum
 {
   RES_14BIT = 0,
@@ -23,6 +26,7 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 uint16_t GetAngle_raw(void);
 float GetAngle_deg(void);
 float GetANgle_rad(void);
+uint16_t GetAngle_raw(void);
 
 #ifdef __cplusplus
 }
