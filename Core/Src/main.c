@@ -126,8 +126,8 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Infinite loop */
-  uint16_t angle_rawdata = 0;
   /* USER CODE BEGIN WHILE */
+    uint16_t angle_rawdata = 0;
   while (1)
   {
 
