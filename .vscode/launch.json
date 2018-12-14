@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/MeasureBoard_fw.elf",
+            "name": "Debug(OpenOCD)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F303CC",
+            "servertype": "openocd",
+            "configFiles":[
+                "board/st_nucleo_f3.cfg"
+            ]
+        },
+        {
             "name": "Debug(J-Link)",
             "cwd": "${workspaceRoot}",
             "executable": "./build/MeasureBoard_fw.elf",
