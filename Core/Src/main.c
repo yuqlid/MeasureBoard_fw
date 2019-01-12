@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -68,7 +68,12 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+CAN_HandleTypeDef     CanHandle;
+CAN_TxHeaderTypeDef   TxHeader;
+CAN_RxHeaderTypeDef   RxHeader;
+uint8_t               TxData[8];
+uint8_t               RxData[8];
+uint32_t              TxMailbox;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,7 +96,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  CAN_FilterTypeDef  sFilterConfig;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -128,14 +133,81 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+      /*##-2- Configure the CAN Filter ###########################################*/
+  sFilterConfig.FilterBank = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.SlaveStartFilterBank = 14;
+
+  if(HAL_CAN_ConfigFilter(&CanHandle, &sFilterConfig) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+  }
+
+  /*##-3- Start the CAN peripheral ###########################################*/
+  if (HAL_CAN_Start(&CanHandle) != HAL_OK)
+  {
+    /* Start Error */
+    Error_Handler();
+  }
+
+  /*##-4- Start the Transmission process #####################################*/
+  TxHeader.StdId = 0x11;
+  TxHeader.RTR = CAN_RTR_DATA;
+  TxHeader.IDE = CAN_ID_STD;
+  TxHeader.DLC = 2;
+  TxHeader.TransmitGlobalTime = DISABLE;
+  TxData[0] = 0xCA;
+  TxData[1] = 0xFE;
+
+  /* Request transmission */
+  if(HAL_CAN_AddTxMessage(&CanHandle, &TxHeader, TxData, &TxMailbox) != HAL_OK)
+  {
+    /* Transmission request Error */
+      Error_Handler();
+  }
+
+  /* Wait transmission complete */
+  while(HAL_CAN_GetTxMailboxesFreeLevel(&CanHandle) != 3) {}
+
+  /*##-5- Start the Reception process ########################################*/
+  if(HAL_CAN_GetRxFifoFillLevel(&CanHandle, CAN_RX_FIFO0) != 1)
+  {
+    /* Reception Missing */
+      Error_Handler();
+  }
+
+  if(HAL_CAN_GetRxMessage(&CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+  {
+    /* Reception Error */
+      Error_Handler();
+  }
+
+  if((RxHeader.StdId != 0x11)                     ||
+     (RxHeader.RTR != CAN_RTR_DATA)               ||
+     (RxHeader.IDE != CAN_ID_STD)                 ||
+     (RxHeader.DLC != 2)                          ||
+     ((RxData[0]<<8 | RxData[1]) != 0xCAFE))
+  {
+    /* Rx message Error */
+      Error_Handler();
+  }
   while (1)
   {
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    HAL_Delay(100);
+    HAL_Delay(500);
     printf("%d\n",GetAngle_raw());
+    LED_Toggle(LED1);
   }
   /* USER CODE END 3 */
 
