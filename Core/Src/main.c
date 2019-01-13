@@ -67,8 +67,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+#define CanHandle	hcan
 /* Private variables ---------------------------------------------------------*/
-CAN_HandleTypeDef     CanHandle;
+//CAN_HandleTypeDef     CanHandle;
 CAN_TxHeaderTypeDef   TxHeader;
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               TxData[8];
