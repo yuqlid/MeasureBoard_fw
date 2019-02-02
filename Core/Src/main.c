@@ -244,7 +244,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
     LED_Toggle(LED0);
     UpdateAngle();
     //printf("%04d\n",GetAngle_raw());
-    printf("%04d\n",GetVelcity_raw()*12000/4095);   //RPM Out
+    printf("%04d\n",((GetVelcity_raw()*12000)>>12));   //RPM Out
 
 }
 /* USER CODE END 4 */
