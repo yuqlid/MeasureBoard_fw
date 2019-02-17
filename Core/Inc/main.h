@@ -60,7 +60,8 @@
 /* Private define ------------------------------------------------------------*/
 #define TIM17_PERIOD (25-1)
 #define TIM17_PSC (7200-1)
-#define USART3_Baudrate 1000000
+#define USART3_Baudrate 115200
+#define USART1_Baudrate 1000000
 
 #define DIP2_Pin GPIO_PIN_13
 #define DIP2_GPIO_Port GPIOC
