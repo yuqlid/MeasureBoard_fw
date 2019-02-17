@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -76,7 +76,20 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+int32_t MechSpeed_RPM = 0;
+int32_t MechSpeed_filterd_RPM = 0;
 
+#define TRUE  1
+#define FALSE 0
+#define FILTER_DEEP_SHIFT 4
+#define FILTER_DEEP       (1<<FILTER_DEEP_SHIFT)
+
+uint16_t index_array = 0;                           /*!<  Speed filter variable */
+int32_t speed_tmp_array[FILTER_DEEP];               /*!<  Speed filter variable */
+
+int32_t speed_sum_sp_filt = 0;
+
+uint8_t  array_completed = FALSE;  
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -131,7 +144,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
     uint16_t angle = 0;
-    uint32_t send_buf = 1000;
+    uint32_t send_buf = 18000;
     uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
     while (1)
     {
@@ -240,11 +253,49 @@ void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size){
 
 }
 
+void MC_Speed_Filter(void){
+  
+  speed_sum_sp_filt = 0;
+  speed_tmp_array[index_array] = MechSpeed_RPM;
+  if(array_completed == FALSE){
+    for(int16_t i = (index_array-1); i>=0; i--){
+      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
+    }
+    index_array++;
+    if(index_array >= FILTER_DEEP){
+      index_array = 0;
+      array_completed = TRUE;
+    }
+  }else{
+    for(int16_t i = (FILTER_DEEP-1); i >= 0; i--){
+      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
+    }
+    index_array++;
+    if(index_array >= FILTER_DEEP){
+      index_array = 0;
+    }
+  }
+  MechSpeed_filterd_RPM = speed_sum_sp_filt>>FILTER_DEEP_SHIFT;
+}
+
+int32_t GetVelcity_RPM(void){
+  return ((GetVelcity_raw()*24000)>>12);
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+
+    static uint8_t i =0;
+    MechSpeed_RPM = GetVelcity_RPM();
     LED_Toggle(LED0);
     UpdateAngle();
+    MC_Speed_Filter();
     //printf("%04d\n",GetAngle_raw());
-    printf("%04d\n",((GetVelcity_raw()*12000)>>12));   //RPM Out
+    i++;
+    if(i >= 4){
+      printf("%04d,%04d\n",MechSpeed_RPM, MechSpeed_filterd_RPM);   //RPM Out
+      i =0;
+    }
+
 
 }
 /* USER CODE END 4 */

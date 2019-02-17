@@ -36,8 +36,8 @@ int16_t GetVelcity_raw(void){
     int16_t tmp = 0;
     velocity = angleraw - angleraw_z1;
     
-    if(velocity_z1 >= 0 && velocity < -2000)velocity +=4095;
-    else if(velocity_z1 <= 0 && velocity > 2000)velocity -=4095;
+    if(MechSpeed_filterd_RPM >= 0 && velocity < -2000)velocity +=4095;
+    else if(MechSpeed_filterd_RPM <= 0 && velocity > 2000)velocity -=4095;
     velocity_z1 = velocity;
     return velocity;
 }

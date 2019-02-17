@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -58,8 +58,9 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
-#define TIM17_PERIOD 50-1
-#define TIM17_PSC 7200-1
+#define TIM17_PERIOD (25-1)
+#define TIM17_PSC (7200-1)
+#define USART3_Baudrate 1000000
 
 #define DIP2_Pin GPIO_PIN_13
 #define DIP2_GPIO_Port GPIOC
@@ -87,7 +88,7 @@
 
 /* USER CODE BEGIN Private defines */
 void printb(uint16_t v);
-
+extern int32_t MechSpeed_filterd_RPM;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
