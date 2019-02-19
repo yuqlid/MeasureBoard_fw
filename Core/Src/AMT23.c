@@ -11,17 +11,20 @@
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
 
-uint16_t angleraw = 0;
-uint16_t angleraw_z1= 0;
-int16_t velocity = 0;
-int16_t velocity_z1 = 0;
-uint8_t rxbuf[2] = {0,0};
+uint16_t    angleraw = 0;
+uint16_t    angleraw_z1= 0;
+int16_t     velocity = 0;
+int16_t     velocity_z1 = 0;
+uint8_t     rxbuf[2] = {0,0};
+uint16_t    SamplingFreq_Hz = 1;
+uint16_t    AMT23_CPR = 1;
 
-void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_set){
+void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_set, uint16_t Period, uint16_t Prescaler){
 
     hspi_amt23 = hspi;
     resolition_shift = resolution_shift_set;
-
+    SamplingFreq_Hz = HAL_RCC_GetHCLKFreq()/(( Period + 1) * (Prescaler +1));
+    AMT23_CPR <<= (14 - (uint8_t)resolition_shift);
 }
 
 void UpdateAngle(void){
@@ -46,8 +49,12 @@ float GetAngle_deg(void){
     return 0;
 }
 
-float GetANgle_rad(void){
+float GetAngle_rad(void){
     return 0;
+}
+
+int32_t GetVelcity_RPM(void){
+  return ( (GetVelcity_raw()*60) * SamplingFreq_Hz)/AMT23_CPR;
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){

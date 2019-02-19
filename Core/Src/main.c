@@ -135,10 +135,11 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-    UART_Util_Init(&huart1);
-    //printf("Build: %s %s\r\n",__DATE__,__TIME__);
-    Encoder_Init(&hspi1, RES_12BIT);
-    HAL_TIM_Base_Start_IT(&htim17);
+  UART_Util_Init(&huart1);
+  //printf("Build: %s %s\r\n",__DATE__,__TIME__);
+  Encoder_Init(&hspi1, RES_12BIT, TIM17_PERIOD, TIM17_PSC);
+  HAL_TIM_Base_Start_IT(&htim17);
+  printf("%8d\n",SamplingFreq_Hz);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,17 +147,18 @@ int main(void)
     uint16_t angle = 0;
     uint32_t send_buf = 18000;
     uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
+    
     while (1)
     {
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-        HAL_Delay(10);
-        //UpdateAngle();
-        RS485_Transmit(0x13, 0x00, (uint8_t *)&send_buf, sizeof(Data));
-        //angle = GetAngle_raw();
-        //printf("%04d\n",angle);
+      HAL_Delay(10);
+      //UpdateAngle();
+      //RS485_Transmit(0x13, 0x00, (uint8_t *)&send_buf, sizeof(Data));
+      //angle = GetAngle_raw();
+      //printf("%8d\n",HAL_RCC_GetHCLKFreq());
 
     }
   /* USER CODE END 3 */
@@ -278,10 +280,6 @@ void MC_Speed_Filter(void){
   MechSpeed_filterd_RPM = speed_sum_sp_filt>>FILTER_DEEP_SHIFT;
 }
 
-int32_t GetVelcity_RPM(void){
-  return ((GetVelcity_raw()*24000)>>12);
-}
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
     static uint8_t i =0;
@@ -291,10 +289,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
     MC_Speed_Filter();
     //printf("%04d\n",GetAngle_raw());
     i++;
+    
     if(i >= 4){
       printf("%04d,%04d\n",MechSpeed_RPM, MechSpeed_filterd_RPM);   //RPM Out
       i =0;
     }
+    
 
 
 }
