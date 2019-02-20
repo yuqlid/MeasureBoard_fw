@@ -11,11 +11,12 @@
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
 
-uint16_t    angleraw = 0;
-uint16_t    angleraw_z1= 0;
-int16_t     velocity = 0;
-int16_t     velocity_z1 = 0;
-uint8_t     rxbuf[2] = {0,0};
+volatile uint16_t    angleraw = 0;
+volatile uint16_t    angleraw_z1= 0;
+volatile int16_t     velocity = 0;
+volatile int16_t     velocity_z1 = 0;
+
+uint8_t     spirxbuf[2] = {0,0};
 uint16_t    SamplingFreq_Hz = 1;
 uint16_t    AMT23_CPR = 1;
 
@@ -28,21 +29,11 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 }
 
 void UpdateAngle(void){
-    HAL_SPI_Receive_IT(hspi_amt23, rxbuf, 2);
+    HAL_SPI_Receive_IT(hspi_amt23, spirxbuf, 2);
 }
 
 uint16_t GetAngle_raw(void){
     return angleraw;
-}
-
-int16_t GetVelcity_raw(void){
-    int16_t tmp = 0;
-    velocity = angleraw - angleraw_z1;
-    
-    if(MechSpeed_filterd_RPM >= 0 && velocity < -2000)velocity +=4095;
-    else if(MechSpeed_filterd_RPM <= 0 && velocity > 2000)velocity -=4095;
-    velocity_z1 = velocity;
-    return velocity;
 }
 
 float GetAngle_deg(void){
@@ -53,14 +44,25 @@ float GetAngle_rad(void){
     return 0;
 }
 
+int16_t GetVelcity_cnt(void){
+    
+    velocity = angleraw - angleraw_z1;
+    
+    if(angleraw_z1 >= 0 && velocity < -2000)velocity +=4095;
+    else if(angleraw_z1 < 0 && velocity > 2000)velocity -=4095;
+    velocity_z1 = velocity;
+
+    return velocity;
+}
+
 int32_t GetVelcity_RPM(void){
-  return ( (GetVelcity_raw()*60) * SamplingFreq_Hz)/AMT23_CPR;
+  return ( ( GetVelcity_cnt() * 60 ) * SamplingFreq_Hz ) / AMT23_CPR;
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 
     angleraw_z1 = angleraw;
-    angleraw = 0x0FFF&((rxbuf[0]<<5)|rxbuf[1]>>3);
+    angleraw = 0x0FFF&((spirxbuf[0]<<5)|spirxbuf[1]>>3);
     //printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
     //printf(",%04d\n",angleraw);
 }

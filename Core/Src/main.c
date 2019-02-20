@@ -137,9 +137,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   UART_Util_Init(&huart1);
   //printf("Build: %s %s\r\n",__DATE__,__TIME__);
-  Encoder_Init(&hspi1, RES_12BIT, TIM17_PERIOD, TIM17_PSC);
+  Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
   HAL_TIM_Base_Start_IT(&htim17);
-  printf("%8d\n",SamplingFreq_Hz);
+  //printf("%8d\n",SamplingFreq_Hz);
   /* USER CODE END 2 */
 
   /* Infinite loop */

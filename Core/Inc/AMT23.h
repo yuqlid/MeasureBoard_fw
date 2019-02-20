@@ -13,8 +13,6 @@
 
 #include "spi.h"
 
-
-//extern uint16_t angleraw;
 extern uint16_t    SamplingFreq_Hz;
 
 typedef enum
@@ -28,7 +26,7 @@ void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_s
 uint16_t GetAngle_raw(void);
 float GetAngle_deg(void);
 float GetANgle_rad(void);
-uint16_t GetAngle_raw(void);
+int16_t GetVelcity_cnt(void);
 int32_t GetVelcity_RPM(void);
 
 #ifdef __cplusplus
