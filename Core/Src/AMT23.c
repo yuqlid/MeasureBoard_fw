@@ -46,12 +46,12 @@ float GetAngle_rad(void){
 
 int16_t GetVelcity_cnt(void){
     
-    velocity = angleraw - angleraw_z1;
+    int16_t velocity_temp = angleraw - angleraw_z1;
     
-    if(angleraw_z1 >= 0 && velocity < -2000)velocity +=4095;
-    else if(angleraw_z1 < 0 && velocity > 2000)velocity -=4095;
+    if(velocity >= 0 && velocity_temp < -2000)velocity_temp +=4095;
+    else if(velocity < 0 && velocity_temp > 2000)velocity_temp -=4095;
     velocity_z1 = velocity;
-
+    velocity = (1 * velocity_z1 + 1 * velocity_temp)/2;
     return velocity;
 }
 
