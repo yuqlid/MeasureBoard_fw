@@ -29,6 +29,8 @@
 #include "MeasurementBoard_v1.h"
 #include "rs485.h"
 #include "AMT23.h"
+#include <stdint.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -121,10 +123,10 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  osThreadStaticDef(rs485Task, rs485TransmitTask, osPriorityNormal, 0, 128, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
+  osThreadStaticDef(rs485Task, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(rs485Task), NULL);
 
-  osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 128, COMSendTaskBuffer, &COMSendTaskControlBlock);
+  osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(comTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
@@ -159,7 +161,7 @@ void rs485TransmitTask(void const * argument){
   uint32_t send_buf = 18000;
   uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
   for(;;)
-  { 
+  {
     LED_Toggle(LED2);
     osDelay(10);
     if(ID <= 0x13){

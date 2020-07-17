@@ -63,6 +63,7 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 Src/uart_util_hal.c \
 Src/syscalls.c \
+Src/sysmem.c \
 Src/AMT23.c \
 BSP/MeasurementBoard_v1.c \
 Src/main.c \

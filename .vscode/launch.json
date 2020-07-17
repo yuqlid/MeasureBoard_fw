@@ -24,9 +24,11 @@
             "type": "cortex-debug",
             "servertype": "jlink",
             "device": "STM32F303CC",
+            "rtos": "FreeRTOS",
             "interface": "jtag",
             "ipAddress": null,
             "serialNumber": null,
+            "runToMain": true,
         }
     ]
 }

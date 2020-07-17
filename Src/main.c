@@ -36,6 +36,9 @@
 #include "MeasurementBoard_v1.h"
 #include "uart_util_hal.h"
 #include "AMT23.h"
+
+#include <stdio.h>
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +50,12 @@
 /* USER CODE BEGIN PD */
 #define FILTER_DEEP_SHIFT 4
 #define FILTER_DEEP       (1<<FILTER_DEEP_SHIFT)
+
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -76,7 +85,11 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+/*
+void __io_putchar(uint8_t ch) {
+  HAL_UART_Transmit(&huart1, &ch, 1, 1);
+}
+*/
 /* USER CODE END 0 */
 
 /**
@@ -117,9 +130,10 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-
+  setbuf(stdout, NULL );
   UART_Util_Init(&huart1);
-  //printf("Build: %s %s\r\n",__DATE__,__TIME__);
+  printf("%s,%s\r\n",__DATE__,__TIME__);
+  printf("MeasurementBoard_fw\r\n");
   Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
