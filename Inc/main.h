@@ -54,7 +54,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

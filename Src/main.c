@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "can.h"
 #include "dma.h"
 #include "i2c.h"
@@ -64,15 +65,13 @@ int32_t speed_tmp_array[FILTER_DEEP];               /*!<  Speed filter variable 
 int32_t speed_sum_sp_filt = 0;
 
 uint8_t  array_completed = false;
-uint32_t send_buf = 18000;
-uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
-uint8_t ID = 0x10;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -115,7 +114,6 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
-  MX_USB_DEVICE_Init();
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
@@ -123,18 +121,23 @@ int main(void)
   UART_Util_Init(&huart1);
   //printf("Build: %s %s\r\n",__DATE__,__TIME__);
   Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
-  HAL_TIM_Base_Start_IT(&htim17);
-  HAL_TIM_Base_Start_IT(&htim16);
+  //HAL_TIM_Base_Start_IT(&htim17);
+  //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
 
   /* USER CODE END 2 */
 
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init(); 
+  /* Start scheduler */
+  osKernelStart();
+ 
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      HAL_Delay(500);
-      LED_Toggle(LED1);
+    osDelay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -199,26 +202,6 @@ void printb(uint16_t v) {
   while (mask >>= 1);
 }
 
-void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size){
-
-    uint8_t ubSend = 0;
-    uint8_t parity = 0x00;
-    uint8_t Packet[6 + size];
-    Packet[0] = 0xFA;
-    Packet[1] = 0xAF;
-    Packet[2] = ID;
-    Packet[3] = addr;
-    Packet[4] = size;
-
-    for(uint8_t i = 0; i < size; i++)Packet[i + 5] = TxData[i];
-    for(uint8_t i = 2; i < (5 + size); i++)parity ^= Packet[i];
-
-    Packet[5 + size] = parity;
-
-    HAL_UART_Transmit_DMA(&huart3, Packet, sizeof(Packet));
-
-}
-
 void MC_Speed_Filter(void){
   
   speed_sum_sp_filt = 0;
@@ -244,33 +227,28 @@ void MC_Speed_Filter(void){
   MechSpeed_filterd_RPM = speed_sum_sp_filt>>FILTER_DEEP_SHIFT;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-
-    if(htim->Instance == TIM17){
-        static uint8_t i =0;
-        MechSpeed_RPM = GetVelcity_RPM();
-        LED_Toggle(LED0);
-        UpdateAngle();
-        MC_Speed_Filter();
-        //printf("%04d\n",GetAngle_raw());
-        i++;
-        
-        if(i >= 4){
-          printf("%04d,%04d\n",MechSpeed_RPM, MechSpeed_filterd_RPM);   //RPM Out
-          i =0;
-        }
-    }else if(htim->Instance == TIM16){
-        if(ID <= 0x13){
-            RS485_Transmit(ID, 0x00, (uint8_t *)&send_buf, sizeof(Data));
-            ID++;
-        }else{
-            ID = 0x10;
-        }
-        
-    }
-}
-
 /* USER CODE END 4 */
+
+ /**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM15 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM15) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
