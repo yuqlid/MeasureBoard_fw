@@ -58,15 +58,22 @@ osThreadId COMSendTaskHandle;
 uint32_t COMSendTaskBuffer[ 256 ];
 osStaticThreadDef_t COMSendTaskControlBlock;
 
+osThreadId EncoderTaskHandle;
+uint32_t EncoderTaskBuffer[ 256 ];
+osStaticThreadDef_t EncoderTaskControlBlock;
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 uint32_t defaultTaskBuffer[ 128 ];
 osStaticThreadDef_t defaultTaskControlBlock;
 
+int16_t speed_rpm_fil = 0;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void COMSendTask(void const * argument);
 void rs485TransmitTask(void const * argument);
+void EncoderTask(void const * argument);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -124,10 +131,13 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   osThreadStaticDef(rs485Task, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
-  defaultTaskHandle = osThreadCreate(osThread(rs485Task), NULL);
+  rs485TransmitTaskHandle = osThreadCreate(osThread(rs485Task), NULL);
 
   osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
-  defaultTaskHandle = osThreadCreate(osThread(comTask), NULL);
+  COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
+
+  osThreadStaticDef(encoderTask, EncoderTask, osPriorityNormal, 0, 256, EncoderTaskBuffer, &EncoderTaskControlBlock);
+  EncoderTaskHandle = osThreadCreate(osThread(encoderTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -147,6 +157,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    UpdateAngle();
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
@@ -155,9 +166,36 @@ void StartDefaultTask(void const * argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
      
+void EncoderTask(void const * argument){
+
+  uint8_t i = 0;
+  
+  #define LENGTH 8
+  int32_t speed_temp[LENGTH];
+  int32_t speed_sum = 0;
+  for(int8_t j = 0; j < LENGTH; j++){
+    speed_temp[j] = 0;
+  }
+
+  for(;;)
+  {
+    osSignalWait(1, osWaitForever);
+    LED_Toggle(LED1);
+    speed_temp[i] = GetVelcity_RPM();
+    speed_sum = 0;
+    for (int8_t k = 0; k < LENGTH; k++){
+      speed_sum += speed_temp[k];
+    }
+    speed_rpm_fil = speed_sum / LENGTH;
+    i++;
+    if(i == LENGTH){
+      i = 0;
+    }
+  }
+}
 void rs485TransmitTask(void const * argument){
 
-  uint8_t ID;
+  uint8_t ID = 0x10;
   uint32_t send_buf = 18000;
   uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
   for(;;)
@@ -181,10 +219,9 @@ void COMSendTask(void const * argument){
     static uint8_t i =0;
     //MechSpeed_RPM = GetVelcity_RPM();
     LED_Toggle(LED0);
-    UpdateAngle();
     osDelay(2);
     //MC_Speed_Filter();
-    printf("%04d\n",GetAngle_raw());
+    printf("%04d\n",speed_rpm_fil);
     i++;
     
     if(i >= 4){

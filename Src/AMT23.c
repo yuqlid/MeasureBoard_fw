@@ -7,7 +7,9 @@
 
 #include "AMT23.h"
 #include "main.h"
+#include "cmsis_os.h"
 
+extern osThreadId EncoderTaskHandle;
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
 
@@ -48,21 +50,24 @@ int16_t GetVelcity_cnt(void){
     
     int16_t velocity_temp = angleraw - angleraw_z1;
     
-    if(velocity >= 0 && velocity_temp < -2000)velocity_temp +=4095;
-    else if(velocity < 0 && velocity_temp > 2000)velocity_temp -=4095;
-    velocity_z1 = velocity;
+    if(velocity >= 0){
+        if(velocity_temp < -2000)velocity_temp +=4095;
+    }else{
+        if(velocity_temp > 2000)velocity_temp -=4095;
+    }
+    
     velocity = (1 * velocity_z1 + 1 * velocity_temp)/2;
+    velocity_z1 = velocity;
     return velocity;
 }
 
 int32_t GetVelcity_RPM(void){
-  return ( ( GetVelcity_cnt() * 60 ) * SamplingFreq_Hz ) / AMT23_CPR;
+  return ( ( GetVelcity_cnt() * 60 ) * 1000 ) / AMT23_CPR;
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 
     angleraw_z1 = angleraw;
     angleraw = 0x0FFF&((spirxbuf[0]<<5)|spirxbuf[1]>>3);
-    //printb((uint16_t)((rxbuf[0]<<8)|rxbuf[1]));
-    //printf(",%04d\n",angleraw);
+    osSignalSet(EncoderTaskHandle, 1);
 }

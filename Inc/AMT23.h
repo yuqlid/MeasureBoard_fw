@@ -23,6 +23,7 @@ typedef enum
 
 void Encoder_Init(SPI_HandleTypeDef* hspi, Resolution_TypeDef resolution_shift_set, uint16_t Period, uint16_t Prescaler);
 
+void UpdateAngle(void);
 uint16_t GetAngle_raw(void);
 float GetAngle_deg(void);
 float GetANgle_rad(void);
