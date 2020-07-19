@@ -221,10 +221,17 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $@		
 
-# Program
+#######################################
+# Program OpenOCD
+#######################################
+#upload: build/$(TARGET).bin
+#	openocd -f board/st_nucleo_f3.cfg -c "reset_config trst_only combined" -c "program build/$(TARGET).elf verify reset exit"
+
+#######################################
+# Program J-Link
+#######################################
 upload: build/$(TARGET).bin
-#	openocd -f interface/stlink-v2.cfg -c "set WORKAREASIZE 0x2000" -f target/stm32f4x_stlink.cfg -c "program build/$(PROJECT).elf verify reset" # Older openocd
-	openocd -f board/st_nucleo_f3.cfg -c "reset_config trst_only combined" -c "program build/$(TARGET).elf verify reset exit" # For openocd 0.9
+	JLink -device STM32F303CC -if SWD -speed 4000 -autoconnect 1 -CommanderScript download_flash.jlink
 
 #######################################
 # clean up
