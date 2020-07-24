@@ -94,6 +94,7 @@ Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
 Middlewares/Third_Party/FreeRTOS/Source/timers.c \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
+Src/FreeRTOS-openocd.c \
 Src/rs485.c
 
 # ASM sources
@@ -186,7 +187,7 @@ LDSCRIPT = STM32F303CCTx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections -Wl,--undefined=uxTopUsedPriority
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
@@ -224,13 +225,13 @@ $(BUILD_DIR):
 #######################################
 # Program OpenOCD
 #######################################
-#upload: build/$(TARGET).bin
-#	openocd -f board/st_nucleo_f3.cfg -c "reset_config trst_only combined" -c "program build/$(TARGET).elf verify reset exit"
+upload_open: build/$(TARGET).bin
+	openocd -f board/st_nucleo_f3.cfg -c "reset_config trst_only combined" -c "program build/$(TARGET).elf verify reset exit"
 
 #######################################
 # Program J-Link
 #######################################
-upload: build/$(TARGET).bin
+upload_jlink: build/$(TARGET).bin
 	JLink -device STM32F303CC -if SWD -speed 4000 -autoconnect 1 -CommanderScript download_flash.jlink
 
 #######################################

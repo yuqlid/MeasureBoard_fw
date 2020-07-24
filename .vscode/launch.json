@@ -9,9 +9,12 @@
             "executable": "./build/MeasureBoard_fw.elf",
             "name": "Debug(OpenOCD)",
             "request": "launch",
+            "rtos": "FreeRTOS",
             "type": "cortex-debug",
             "device": "STM32F303CC",
             "servertype": "openocd",
+            "interface": "jtag",
+            "svdFile": "STM32F303x.svd",
             "configFiles":[
                 "board/st_nucleo_f3.cfg"
             ]
@@ -26,8 +29,7 @@
             "device": "STM32F303CC",
             "rtos": "FreeRTOS",
             "interface": "jtag",
-            "ipAddress": null,
-            "serialNumber": null,
+            "svdFile": "STM32F303x.svd",
             "runToMain": true,
         }
     ]
