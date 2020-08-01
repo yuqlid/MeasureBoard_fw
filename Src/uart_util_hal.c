@@ -8,6 +8,7 @@
 
 #include "main.h"
 #include "uart_util_hal.h"
+#include "cmsis_os.h"
 
 extern UART_HandleTypeDef huart1;
 static UART_HandleTypeDef *huart_print;
@@ -151,7 +152,8 @@ int __io_putchar(int ch){
 
 int __io_getchar(void){
     while( msgrx_circ_buf_is_empty(huart_print, &print_rx_index) ){
-        HAL_Delay(1);
+        //HAL_Delay(1);
+        osDelay(1);
     }
     return msgrx_circ_buf_get(huart_print, print_rx_buf, &print_rx_index);
 }

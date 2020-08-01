@@ -62,12 +62,9 @@ osThreadId EncoderTaskHandle;
 uint32_t EncoderTaskBuffer[ 256 ];
 osStaticThreadDef_t EncoderTaskControlBlock;
 
+int32_t speed_rpm_fil;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 128 ];
-osStaticThreadDef_t defaultTaskControlBlock;
-
-int16_t speed_rpm_fil = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -125,7 +122,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128, defaultTaskBuffer, &defaultTaskControlBlock);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -179,17 +176,20 @@ void EncoderTask(void const * argument){
 
   for(;;)
   {
-    osSignalWait(1, osWaitForever);
-    LED_Toggle(LED1);
-    speed_temp[i] = GetVelcity_RPM();
-    speed_sum = 0;
-    for (int8_t k = 0; k < LENGTH; k++){
-      speed_sum += speed_temp[k];
-    }
-    speed_rpm_fil = speed_sum / LENGTH;
-    i++;
-    if(i == LENGTH){
-      i = 0;
+    osEvent event = osSignalWait(0b0001, osWaitForever);
+    if (event.status == osEventSignal
+        && event.value.signals == 0b0001) {
+          LED_Toggle(LED1);
+          speed_temp[i] = GetVelcity_RPM();
+          speed_sum = 0;
+          for (int8_t k = 0; k < LENGTH; k++){
+            speed_sum += speed_temp[k];
+          }
+          speed_rpm_fil = speed_sum / LENGTH;
+          i++;
+          if(i == LENGTH){
+            i = 0;
+          }
     }
   }
 }
@@ -221,7 +221,7 @@ void COMSendTask(void const * argument){
     LED_Toggle(LED0);
     osDelay(2);
     //MC_Speed_Filter();
-    printf("%04d\n",speed_rpm_fil);
+    printf("%04ld\n",speed_rpm_fil);
     i++;
     
     if(i >= 4){

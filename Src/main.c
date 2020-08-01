@@ -34,8 +34,11 @@
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
 #include "MeasurementBoard_v1.h"
-#include "uart_util_hal.h"
+//#include "uart_util_hal.h"
 #include "AMT23.h"
+
+#include "FreeRTOS_CLI.h"
+//#include "UART-interrupt-driven-command-console.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -56,6 +59,10 @@
 #else
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
+
+void __io_putchar(uint8_t ch) {
+  HAL_UART_Transmit(&huart1, &ch, 1, 100);
+}
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -80,7 +87,8 @@ uint8_t  array_completed = false;
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+extern void vUARTCommandConsoleStart( void );
+extern void vRegisterSampleCLICommands( void );
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -131,13 +139,21 @@ int main(void)
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   setbuf(stdout, NULL );
-  UART_Util_Init(&huart1);
-  printf("%s,%s\r\n",__DATE__,__TIME__);
+  //UART_Util_Init(&huart1);
+  //uint8_t a = 'B';
+  //HAL_UART_Transmit(&huart1, &a, 1, 100);
+  printf("\r\n%s,%s\r\n",__DATE__,__TIME__);
   printf("MeasurementBoard_fw\r\n");
   Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
+
+  /* Register two command line commands to show task stats and run time stats
+  respectively. */
+  vRegisterSampleCLICommands();
+
+  vUARTCommandConsoleStart();
 
   /* USER CODE END 2 */
 
