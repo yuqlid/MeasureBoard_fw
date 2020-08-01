@@ -9,7 +9,7 @@
             "executable": "./build/MeasureBoard_fw.elf",
             "name": "Debug(OpenOCD)",
             "request": "launch",
-            "rtos": "FreeRTOS",
+            //"rtos": "FreeRTOS",
             "type": "cortex-debug",
             "device": "STM32F303CC",
             "servertype": "openocd",

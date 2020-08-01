@@ -16,8 +16,9 @@
                     "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/include",
                     "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS",
                     "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                    "E:/gcc-arm-none-eabi-7-2018-q2-update-win32/arm-none-eabi/include",
-                    "E:/gcc-arm-none-eabi-7-2018-q2-update-win32/lib//gcc/arm-none-eabi/7.3.1/include"
+                    "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+                    "C:/gcc-arm-none-eabi-7-2018-q2-update-win32/arm-none-eabi/include",
+                    "C:/gcc-arm-none-eabi-7-2018-q2-update-win32/lib//gcc/arm-none-eabi/7.3.1/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
@@ -31,11 +32,12 @@
                 "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
                 "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F3xx/Include",
                 "${workspaceFolder}/Drivers/CMSIS/Include",
-                "E:/gcc-arm-none-eabi-7-2018-q2-update-win32/arm-none-eabi/include",
-                "E:/gcc-arm-none-eabi-7-2018-q2-update-win32/lib//gcc/arm-none-eabi/7.3.1/include",
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/include",
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS",
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+                "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+                "C:/gcc-arm-none-eabi-7-2018-q2-update-win32/arm-none-eabi/include",
+                "C:/gcc-arm-none-eabi-7-2018-q2-update-win32/lib//gcc/arm-none-eabi/7.3.1/include"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
