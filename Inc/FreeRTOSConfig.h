@@ -53,14 +53,17 @@
 #endif
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          1
-#define configSUPPORT_DYNAMIC_ALLOCATION         0
+#define configSUPPORT_DYNAMIC_ALLOCATION         1
 #define configUSE_IDLE_HOOK                      0
 #define configUSE_TICK_HOOK                      0
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 7 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
+#define configTOTAL_HEAP_SIZE                    ((size_t)3072)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
+#define configUSE_TRACE_FACILITY                 1
+#define configUSE_STATS_FORMATTING_FUNCTIONS     1
 #define configUSE_16_BIT_TICKS                   0
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
@@ -124,6 +127,16 @@ standard names. */
 
 /* USER CODE BEGIN Defines */   	      
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
+
+/* Priorities to assign to tasks created by this demo. */
+#define configUART_COMMAND_CONSOLE_TASK_PRIORITY	( 0U )
+
+/* Dimensions a buffer that can be used by the FreeRTOS+CLI command
+interpreter.  Set this value to 1 to save RAM if FreeRTOS+CLI does not supply
+the output butter.  See the FreeRTOS+CLI documentation for more information:
+http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_CLI/ */
+#define configCOMMAND_INT_MAX_OUTPUT_SIZE			1024
+
 /* USER CODE END Defines */ 
 
 #endif /* FREERTOS_CONFIG_H */
