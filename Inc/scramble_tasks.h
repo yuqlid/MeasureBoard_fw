@@ -25,6 +25,8 @@ extern osThreadId rs485TransmitTaskHandle;
 extern osThreadId COMSendTaskHandle;
 extern osThreadId EncoderTaskHandle;
 
+void scramble_RegisterTasks(void);
+
 #ifdef __cplusplus
 }
 #endif

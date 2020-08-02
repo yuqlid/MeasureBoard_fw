@@ -12,7 +12,6 @@
 
 void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size){
 
-    uint8_t ubSend = 0;
     uint8_t parity = 0x00;
     uint8_t Packet[6 + size];
     Packet[0] = 0xFA;

@@ -72,8 +72,8 @@ available. */
 /*
  * The task that implements the command console processing.
  */
-static void prvUARTCommandConsoleTask( void *pvParameters );
-//void vUARTCommandConsoleStart( uint16_t usStackSize, UBaseType_t uxPriority );
+static void prvUARTCommandConsoleTask( const void *pvParameters );
+void vUARTCommandConsoleStart(void);
 
 /*-----------------------------------------------------------*/
 
@@ -113,7 +113,7 @@ void vUARTCommandConsoleStart( void )
 }
 /*-----------------------------------------------------------*/
 
-static void prvUARTCommandConsoleTask( void *pvParameters )
+static void prvUARTCommandConsoleTask( const void *pvParameters )
 {
 signed char cRxedChar;
 uint8_t ucInputIndex = 0;

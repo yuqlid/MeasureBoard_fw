@@ -13,11 +13,11 @@ extern osThreadId rs485TransmitTaskHandle;
 
 static BaseType_t prvPS485PeriodicCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-const char *pcParameter;
-BaseType_t xParameterStringLength;
-BaseType_t xReturn;
-static UBaseType_t uxParameterNumber = 0;
-static bool state = false;
+	//const char *pcParameter;
+	// xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+	static bool state = false;
 
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the

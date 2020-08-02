@@ -38,6 +38,7 @@
 #include "scramble_tasks.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
+#include "uart_util_hal.h"
 
 #include "FreeRTOS_CLI.h"
 //#include "UART-interrupt-driven-command-console.h"
