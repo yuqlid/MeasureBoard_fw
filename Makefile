@@ -98,7 +98,9 @@ Src/rs485.c \
 Middlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c \
 Src/Sample-CLI-commands.c \
 Src/UARTCommandConsole.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
+Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
+Src/CLI-commands.c \
+Src/scramble_tasks.c
 
 # ASM sources
 ASM_SOURCES =  \

@@ -34,6 +34,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
 #include "MeasurementBoard_v1.h"
+#include "CLI-commands.h"
+#include "scramble_tasks.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 
@@ -152,7 +154,11 @@ int main(void)
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
+  vRegisterScramgleCLICommands();
 
+  scramble_RegisterTasks();
+  osThreadSuspend(rs485TransmitTaskHandle);
+  
   vUARTCommandConsoleStart();
 
   /* USER CODE END 2 */

@@ -177,9 +177,7 @@ BaseType_t xReturned;
 			generate more than one string. */
 			do
 			{
-				if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
-					xReturned = pdPASS;
-
+				if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)xReturned = pdPASS;
 				if( xReturned == pdPASS )
 				{
 					/* Get the string to write to the UART from the command
@@ -203,7 +201,7 @@ BaseType_t xReturned;
 			if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
             {
 				//printf("%s",pcEndOfOutputMessage);
-                HAL_UART_Transmit(&huart1, (uint8_t *) pcEndOfOutputMessage, strlen( ( char * ) pcEndOfOutputMessage ), 10);
+                HAL_UART_Transmit(&huart1, (uint8_t *) pcEndOfOutputMessage, strlen( ( char * ) pcEndOfOutputMessage ), strlen( ( char * ) pcEndOfOutputMessage ));
         	}
 			//vSerialPutString( xPort, ( signed char * ) pcEndOfOutputMessage, ( unsigned short ) strlen( pcEndOfOutputMessage ) );
 		}
@@ -246,7 +244,7 @@ void vOutputString( const char * const pcMessage )
 {
     if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
     {
-		HAL_UART_Transmit(&huart1, (uint8_t *) pcMessage, strlen( ( char * ) pcMessage ), 10);
+		HAL_UART_Transmit(&huart1, (uint8_t *) pcMessage, strlen( ( char * ) pcMessage ), strlen( ( char * ) pcMessage ));
 	}
 }
 /*-----------------------------------------------------------*/
