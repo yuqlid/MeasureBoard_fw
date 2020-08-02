@@ -60,11 +60,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
   /* USER CODE END CAN_MspInit 0 */
     /* CAN clock enable */
     __HAL_RCC_CAN1_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**CAN GPIO Configuration    
+    /**CAN GPIO Configuration
     PB8     ------> CAN_RX
-    PB9     ------> CAN_TX 
+    PB9     ------> CAN_TX
     */
     GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -89,10 +89,10 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
   /* USER CODE END CAN_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_CAN1_CLK_DISABLE();
-  
-    /**CAN GPIO Configuration    
+
+    /**CAN GPIO Configuration
     PB8     ------> CAN_RX
-    PB9     ------> CAN_TX 
+    PB9     ------> CAN_TX
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8|GPIO_PIN_9);
 
@@ -100,7 +100,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
   /* USER CODE END CAN_MspDeInit 1 */
   }
-} 
+}
 
 /* USER CODE BEGIN 1 */
 
