@@ -62,7 +62,7 @@ void rs485TransmitTask(void const * argument){
     for(;;)
     {
         LED_Toggle(LED2);
-        osDelay(10);
+        osDelay(100);
         if(ID <= 0x13){
             RS485_Transmit(ID, 0x00, (uint8_t *)&send_buf, sizeof(Data));
             ID++;
@@ -75,7 +75,7 @@ void rs485TransmitTask(void const * argument){
 void COMSendTask(void const * argument){
 
     for(;;)
-    { 
+    {
         static uint8_t i =0;
         //MechSpeed_RPM = GetVelcity_RPM();
         LED_Toggle(LED0);
