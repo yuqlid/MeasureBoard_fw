@@ -115,12 +115,11 @@ void vUARTCommandConsoleStart( void )
 
 static void prvUARTCommandConsoleTask( const void *pvParameters )
 {
-signed char cRxedChar;
-uint8_t ucInputIndex = 0;
+int8_t cRxedChar;
+int8_t ucInputIndex = 0;
 char *pcOutputString;
 static char cInputString[ cmdMAX_INPUT_SIZE ], cLastInputString[ cmdMAX_INPUT_SIZE ];
-BaseType_t xReturned;
-//xComPortHandle xPort;
+portBASE_TYPE xReturned;
 
 	( void ) pvParameters;
 
@@ -128,13 +127,8 @@ BaseType_t xReturned;
 	exclusion on this buffer as it is assumed only one command console interface
 	will be used at any one time. */
 	pcOutputString = FreeRTOS_CLIGetOutputBuffer();
-	//putch('A');
-	//printf("hello\r\n");
 
 	if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY){
-		//printf("%s",pcWelcomeMessage);
-		//UART_Util_SendByte(&huart1, pcWelcomeMessage, strlen( ( char * ) pcWelcomeMessage ));
-		osDelay(1);
 		HAL_UART_Transmit(&huart1, (uint8_t *) pcWelcomeMessage, strlen( ( char * ) pcWelcomeMessage ) , strlen( ( char * ) pcWelcomeMessage )  );
 	}
 
@@ -144,13 +138,11 @@ BaseType_t xReturned;
 		INCLUDE_vTaskSuspend is not set to 1 - in which case portMAX_DELAY will
 		be a genuine block time rather than an infinite block time. */
 		HAL_UART_Receive(&huart1, (uint8_t *) &cRxedChar, sizeof( cRxedChar ), 0xFFFFFFFF );
-		//cRxedChar = getch();
 
 			/* Echo the character back. */
 			if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
 			{
-				HAL_UART_Transmit(&huart1, (uint8_t *) &cRxedChar, sizeof( cRxedChar ), 0xFFFFFFFF );
-				//putch(cRxedChar);
+				HAL_UART_Transmit(&huart1, (uint8_t *) &cRxedChar, sizeof( cRxedChar ), sizeof( cRxedChar )  );
 
 			}
 		/* Was it the end of the line? */
@@ -159,7 +151,7 @@ BaseType_t xReturned;
 			/* Just to space the output from the input. */
 			if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)
 			{
-			HAL_UART_Transmit(&huart1, (uint8_t *) pcNewLine, strlen( ( char * ) pcNewLine ), strlen( ( char * ) pcNewLine ) );
+				HAL_UART_Transmit(&huart1, (uint8_t *) pcNewLine, strlen( ( char * ) pcNewLine ), strlen( ( char * ) pcNewLine ) );
 			}
 			//vSerialPutString( xPort, ( signed char * ) pcNewLine, ( unsigned short ) strlen( pcNewLine ) );
 
@@ -178,6 +170,7 @@ BaseType_t xReturned;
 			do
 			{
 				if(HAL_UART_GetState(&huart1) == HAL_UART_STATE_READY)xReturned = pdPASS;
+
 				if( xReturned == pdPASS )
 				{
 					/* Get the string to write to the UART from the command
