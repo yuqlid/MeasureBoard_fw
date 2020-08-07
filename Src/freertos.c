@@ -126,8 +126,8 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    UpdateAngle();
-    osDelay(1);
+    osDelay(1000);
+    //printf("hello\r\n");
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -58,8 +58,8 @@ void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define TIM17_PERIOD (25-1)
-#define TIM17_PSC (7200-1)
+#define TIM17_PERIOD (1000-1)
+#define TIM17_PSC (72-1)
 #define USART3_Baudrate 115200
 #define USART1_Baudrate 1000000
 #define TIM16_Period (100-1)

@@ -5,6 +5,8 @@
  *      Author: Yuki
  */
 
+#include "main.h"
+#include "tim.h"
 #include "scramble_tasks.h"
 #include "MeasurementBoard_v1.h"
 #include "AMT23.h"
@@ -33,6 +35,8 @@ void EncoderProcessTask(void const * argument){
     for(int8_t j = 0; j < LENGTH; j++){
         speed_temp[j] = 0;
     }
+
+    HAL_TIM_Base_Start_IT(&htim17);
 
     for(;;)
     {
@@ -81,7 +85,7 @@ void COMSendTask(void const * argument){
         LED_Toggle(LED0);
         osDelay(2);
         //MC_Speed_Filter();
-        printf("%04ld\n",speed_rpm_fil);
+        printf("%4ld\r\n",speed_rpm_fil);
         i++;
 
         if(i >= 4){
