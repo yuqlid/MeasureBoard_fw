@@ -9,7 +9,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 
-extern osThreadId EncoderTaskHandle;
+extern osThreadId EncoderProcessTaskHandle;
 static SPI_HandleTypeDef *hspi_amt23;
 static Resolution_TypeDef resolition_shift;
 
@@ -69,5 +69,5 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 
     angleraw_z1 = angleraw;
     angleraw = 0x0FFF&((spirxbuf[0]<<5)|spirxbuf[1]>>3);
-    osSignalSet(EncoderTaskHandle, 1);
+    osSignalSet(EncoderProcessTaskHandle, 1);
 }

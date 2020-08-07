@@ -23,7 +23,7 @@
 
 extern osThreadId rs485TransmitTaskHandle;
 extern osThreadId COMSendTaskHandle;
-extern osThreadId EncoderTaskHandle;
+extern osThreadId EncoderProcessTaskHandle;
 
 void scramble_RegisterTasks(void);
 

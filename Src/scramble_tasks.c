@@ -19,11 +19,11 @@ osThreadId COMSendTaskHandle;
 static uint32_t COMSendTaskBuffer[ 256 ];
 static osStaticThreadDef_t COMSendTaskControlBlock;
 
-osThreadId EncoderTaskHandle;
-static uint32_t EncoderTaskBuffer[ 256 ];
-static  osStaticThreadDef_t EncoderTaskControlBlock;
+osThreadId EncoderProcessTaskHandle;
+static uint32_t EncoderProcessTaskBuffer[ 256 ];
+static  osStaticThreadDef_t EncoderProcessTaskControlBlock;
 
-void EncoderTask(void const * argument){
+void EncoderProcessTask(void const * argument){
 
     uint8_t i = 0;
 
@@ -99,6 +99,6 @@ void scramble_RegisterTasks(void){
     osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
     COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
 
-    osThreadStaticDef(encoderTask, EncoderTask, osPriorityNormal, 0, 256, EncoderTaskBuffer, &EncoderTaskControlBlock);
-    EncoderTaskHandle = osThreadCreate(osThread(encoderTask), NULL);
+    osThreadStaticDef(encoderprocessTask, EncoderProcessTask, osPriorityNormal, 0, 256, EncoderProcessTaskBuffer, &EncoderProcessTaskControlBlock);
+    EncoderProcessTaskHandle = osThreadCreate(osThread(encoderprocessTask), NULL);
 }
