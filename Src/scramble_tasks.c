@@ -10,8 +10,10 @@
 #include "scramble_tasks.h"
 #include "MeasurementBoard_v1.h"
 #include "AMT23.h"
+#include "rs485.h"
 
-static int32_t speed_rpm_fil;
+static int32_t speed_rpm_fil = 0;
+int32_t target_speed_rpm = 0;
 
 osThreadId rs485TransmitTaskHandle;
 static uint32_t rs485TransmitTaskBuffer[ 256 ];
@@ -24,6 +26,10 @@ static osStaticThreadDef_t COMSendTaskControlBlock;
 osThreadId EncoderProcessTaskHandle;
 static uint32_t EncoderProcessTaskBuffer[ 256 ];
 static  osStaticThreadDef_t EncoderProcessTaskControlBlock;
+
+void setTargetSpeed(long *speed_rpm){
+    target_speed_rpm = *speed_rpm;
+}
 
 void EncoderProcessTask(void const * argument){
 
@@ -61,18 +67,14 @@ void EncoderProcessTask(void const * argument){
 void rs485TransmitTask(void const * argument){
 
     uint8_t ID = 0x10;
-    uint32_t send_buf = 18000;
-    uint8_t Data[] = {0x00,0x00,0xFF,0xB8};
     for(;;)
     {
         LED_Toggle(LED2);
-        osDelay(100);
-        if(ID <= 0x13){
-            RS485_Transmit(ID, 0x00, (uint8_t *)&send_buf, sizeof(Data));
-            ID++;
-        }else{
-            ID = 0x10;
-        }
+        osDelay(1);
+        
+        RS485_Transmit(ID, 0x00, (uint8_t *)&target_speed_rpm, 4);
+        ID++;
+        if(ID > 0x13)ID = 0x10;
     }
 }
 
@@ -97,12 +99,13 @@ void COMSendTask(void const * argument){
 
 void scramble_RegisterTasks(void){
 
+    osThreadStaticDef(encoderprocessTask, EncoderProcessTask, osPriorityNormal, 0, 256, EncoderProcessTaskBuffer, &EncoderProcessTaskControlBlock);
+    EncoderProcessTaskHandle = osThreadCreate(osThread(encoderprocessTask), NULL);
+
     osThreadStaticDef(rs485Task, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
     rs485TransmitTaskHandle = osThreadCreate(osThread(rs485Task), NULL);
 
     osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
     COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
 
-    osThreadStaticDef(encoderprocessTask, EncoderProcessTask, osPriorityNormal, 0, 256, EncoderProcessTaskBuffer, &EncoderProcessTaskControlBlock);
-    EncoderProcessTaskHandle = osThreadCreate(osThread(encoderprocessTask), NULL);
 }

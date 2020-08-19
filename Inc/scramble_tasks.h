@@ -25,6 +25,7 @@ extern osThreadId rs485TransmitTaskHandle;
 extern osThreadId COMSendTaskHandle;
 extern osThreadId EncoderProcessTaskHandle;
 
+void setTargetSpeed(long *speed_rpm);
 void scramble_RegisterTasks(void);
 
 #ifdef __cplusplus

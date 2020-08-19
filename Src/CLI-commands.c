@@ -8,12 +8,11 @@
 #include "CLI-commands.h"
 
 #include "MeasurementBoard_v1.h"
+#include "scramble_tasks.h"
 
 #include <stdio.h>
 
 extern osThreadId rs485TransmitTaskHandle;
-
-long value;
 
 static BaseType_t prvPS485PeriodicCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
@@ -51,6 +50,7 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 	BaseType_t xParameterStringLength;
 	BaseType_t xReturn;
 	static UBaseType_t uxParameterNumber = 0;
+	long speed = 0;
 
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
@@ -80,7 +80,8 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 			strncat( pcWriteBuffer, ( char * ) data, strlen( data ) );
 			strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( " rpm\r\n" ) );
 			
-			value = strtol(pcParameter, NULL , 10);
+			speed = strtol(pcParameter, NULL , 10);
+			setTargetSpeed(&speed);
 
 			/* There might be more parameters to return after this one. */
 			xReturn = pdTRUE;
@@ -105,8 +106,8 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
-	"rs485_periodic",
-	"\r\nrs485_periodic:\r\n Switch RS485 transmit command Periodic of Not\r\n",
+	"com_periodic",
+	"\r\ncom_periodic:\r\n Switch RS485 transmit command Periodic of Not\r\n",
 	prvPS485PeriodicCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
