@@ -26,7 +26,7 @@
 
 #include "FreeRTOS_CLI.h"
 
-void vRegisterScramgleCLICommands( void );
+void vRegisterScrambleCLICommands( void );
 
 #ifdef __cplusplus
 }

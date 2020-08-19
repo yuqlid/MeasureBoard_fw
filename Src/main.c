@@ -155,14 +155,14 @@ int main(void)
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
-  vRegisterScramgleCLICommands();
-
+  vRegisterScrambleCLICommands();
+  
   scramble_RegisterTasks();
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
   
   vUARTCommandConsoleStart();
-
+  
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -175,7 +175,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    osDelay(1);
+    osDelay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -287,7 +287,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM17){
     UpdateAngle();
   }
-
   /* USER CODE END Callback 1 */
 }
 

@@ -119,7 +119,7 @@ static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 	prvSetTargetSpeedCommand, /* The function to run. */
 	1 /* No parameters are expected. */
 };
-void vRegisterScramgleCLICommands( void )
+void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
 	FreeRTOS_CLIRegisterCommand( &xParameterRS485Periodic );
