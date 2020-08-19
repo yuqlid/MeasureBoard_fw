@@ -123,11 +123,14 @@ void StartDefaultTask(void const * argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
+  uint8_t i = 0;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1000);
-    //printf("hello\r\n");
+
+    osDelay(1);
+    i+=1;
+    //printf("%5d\r\n",i);
   }
   /* USER CODE END StartDefaultTask */
 }
