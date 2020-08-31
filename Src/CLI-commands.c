@@ -33,11 +33,13 @@ static BaseType_t prvPS485PeriodicCommand( char *pcWriteBuffer, size_t xWriteBuf
         state = false;
         sprintf( pcWriteBuffer, "RS485_periodicSend : False\r\n" );
         osThreadSuspend(rs485TransmitTaskHandle);
+		osThreadSuspend(COMSendTaskHandle);
         LED_Off(LED2);
     }else{
         state = true;
         sprintf( pcWriteBuffer, "RS485_periodicSend : True\r\n" );
         osThreadResume(rs485TransmitTaskHandle);
+		osThreadResume(COMSendTaskHandle);
     }
     // まだ出力する処理が残ってたらpdTRUEにする．
     xReturn = pdFALSE;
@@ -79,7 +81,7 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
 			strncat( pcWriteBuffer, ( char * ) data, strlen( data ) );
 			strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( " rpm\r\n" ) );
-			
+
 			speed = strtol(pcParameter, NULL , 10);
 			setTargetSpeed(&speed);
 

@@ -11,6 +11,9 @@
 #include "MeasurementBoard_v1.h"
 #include "AMT23.h"
 #include "rs485.h"
+#include <string.h>
+#include <stdarg.h>
+#include "usbd_cdc_if.h"
 
 static int32_t speed_rpm_fil = 0;
 int32_t target_speed_rpm = 0;
@@ -26,6 +29,8 @@ static osStaticThreadDef_t COMSendTaskControlBlock;
 osThreadId EncoderProcessTaskHandle;
 static uint32_t EncoderProcessTaskBuffer[ 256 ];
 static  osStaticThreadDef_t EncoderProcessTaskControlBlock;
+
+void com_printf(const char* format, ...);
 
 void setTargetSpeed(long *speed_rpm){
     target_speed_rpm = *speed_rpm;
@@ -87,7 +92,7 @@ void COMSendTask(void const * argument){
         LED_Toggle(LED0);
         osDelay(2);
         //MC_Speed_Filter();
-        printf("%4ld\r\n",speed_rpm_fil);
+        com_printf("%5ld,%5ld\r\n", target_speed_rpm, speed_rpm_fil);
         i++;
 
         if(i >= 4){
@@ -108,4 +113,19 @@ void scramble_RegisterTasks(void){
     osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
     COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
 
+}
+
+void com_printf(const char* format, ...){
+
+    va_list arg;
+    uint8_t len;
+    static char printf_buf[255];
+
+    va_start(arg, format);
+
+    len = vsnprintf(printf_buf, 255, format, arg);
+
+    if(len > 0){
+        CDC_Transmit_FS((uint8_t *)printf_buf, len);
+    }
 }

@@ -140,6 +140,18 @@ the output butter.  See the FreeRTOS+CLI documentation for more information:
 http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_CLI/ */
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE			1024
 
+// DRN ISR (MSP) stack initialization and checking
+#if !defined(EXTERNC)
+  #if defined(__cplusplus)
+    #define EXTERNC extern "C"
+  #else
+    #define EXTERNC extern
+  #endif
+#endif
+#define configISR_STACK_SIZE_WORDS (0x100) // in WORDS, must be valid constant for GCC assembler
+#define configSUPPORT_ISR_STACK_CHECK  1   // DRN initialize and check ISR stack
+EXTERNC unsigned long /*UBaseType_t*/ xUnusedISRstackWords( void );  // check unused amount at runtime
+
 /* USER CODE END Defines */
 
 #endif /* FREERTOS_CONFIG_H */
