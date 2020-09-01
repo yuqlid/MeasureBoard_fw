@@ -141,6 +141,7 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, RESET);
   setbuf(stdout, NULL );
   //UART_Util_Init(&huart1);
   //uint8_t a = 'B';

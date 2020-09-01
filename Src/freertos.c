@@ -123,6 +123,7 @@ void StartDefaultTask(void const * argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, SET);
   uint8_t i = 0;
   /* Infinite loop */
   for(;;)
