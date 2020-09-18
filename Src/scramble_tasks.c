@@ -14,6 +14,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include "usbd_cdc_if.h"
+#include "cmsis_os.h"
+
+extern osSemaphoreId RS485transmitSemaphoreHandle;
 
 static int32_t speed_rpm_fil = 0;
 int32_t target_speed_rpm = 0;
@@ -74,12 +77,12 @@ void rs485TransmitTask(void const * argument){
     uint8_t ID = 0x10;
     for(;;)
     {
-        LED_Toggle(LED2);
-        osDelay(1);
-        
-        RS485_Transmit(ID, 0x00, (uint8_t *)&target_speed_rpm, 4);
-        ID++;
-        if(ID > 0x13)ID = 0x10;
+        for(ID = 0x10; ID < 0x14; ID++){
+            RS485_Transmit(ID, 0x00, (uint8_t *)&target_speed_rpm, 4);
+            LED_Toggle(LED2);
+            osDelay(1);
+        }
+        osDelay(6);
     }
 }
 
@@ -127,5 +130,12 @@ void com_printf(const char* format, ...){
 
     if(len > 0){
         CDC_Transmit_FS((uint8_t *)printf_buf, len);
+    }
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+    
+    if(huart->Instance == USART3){
+        osSemaphoreRelease(RS485transmitSemaphoreHandle);
     }
 }
