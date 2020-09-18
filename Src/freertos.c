@@ -48,6 +48,8 @@
 /* USER CODE BEGIN Variables */
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+osSemaphoreId RS485transmitSemaphoreHandle;
+osStaticSemaphoreDef_t RS485transmitSemControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -87,6 +89,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of RS485transmitSemaphore */
+  osSemaphoreStaticDef(RS485transmitSemaphore, &RS485transmitSemControlBlock);
+  RS485transmitSemaphoreHandle = osSemaphoreCreate(osSemaphore(RS485transmitSemaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
