@@ -105,6 +105,24 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 	return xReturn;
 }
 
+static BaseType_t prvEncoderCalibrateCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	// xParameterStringLength;
+	BaseType_t xReturn;
+	uint8_t data = 0;
+	//static UBaseType_t uxParameterNumber = 0;
+	static bool state = false;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+    data = 0x01;
+	RS485_Transmit(0x10, 0x30, &data, 1);
+    xReturn = pdFALSE;
+	return xReturn;
+}
 
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
@@ -122,9 +140,19 @@ static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 	prvSetTargetSpeedCommand, /* The function to run. */
 	1 /* No parameters are expected. */
 };
+
+static const CLI_Command_Definition_t xParameterEncoderCalibrate =
+{
+	"calib",
+	"\r\ncalib:\r\n Calibrate Encoder Offset\r\n",
+	prvEncoderCalibrateCommand, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
 	FreeRTOS_CLIRegisterCommand( &xParameterRS485Periodic );
 	FreeRTOS_CLIRegisterCommand( &xParameterSetTargetSPeed );
+	FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
 }
