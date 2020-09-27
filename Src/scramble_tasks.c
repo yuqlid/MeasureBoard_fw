@@ -43,7 +43,7 @@ void EncoderProcessTask(void const * argument){
 
     uint8_t i = 0;
 
-    #define LENGTH 8
+    #define LENGTH 16
     int32_t speed_temp[LENGTH];
     int32_t speed_sum = 0;
     for(int8_t j = 0; j < LENGTH; j++){
