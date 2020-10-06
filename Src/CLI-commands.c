@@ -9,10 +9,12 @@
 
 #include "MeasurementBoard_v1.h"
 #include "scramble_tasks.h"
+#include "can.h"
 
 #include <stdio.h>
 
 extern osThreadId rs485TransmitTaskHandle;
+
 
 static BaseType_t prvPS485PeriodicCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
@@ -117,6 +119,26 @@ static BaseType_t prvEncoderCalibrateCommand( char *pcWriteBuffer, size_t xWrite
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
+
+	CAN_TxHeaderTypeDef   TxHeader;
+	uint8_t               TxData[8];
+	uint32_t              TxMailbox;
+
+	TxHeader.StdId = 0x01;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.DLC = 8;
+	TxHeader.TransmitGlobalTime = DISABLE;
+	TxData[0] = 0x00;
+	TxData[1] = 0x01;
+	TxData[2] = 0x02;
+	TxData[3] = 0x03;
+	TxData[4] = 0x04;
+	TxData[5] = 0x05;
+	TxData[6] = 0x06;
+	TxData[7] = 0x07;
+
+	HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
 
     data = 0x01;
 	RS485_Transmit(0x10, 0x30, &data, 1);

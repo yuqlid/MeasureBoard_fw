@@ -17,7 +17,6 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
@@ -84,6 +83,14 @@ int32_t speed_tmp_array[FILTER_DEEP];               /*!<  Speed filter variable 
 int32_t speed_sum_sp_filt = 0;
 
 uint8_t  array_completed = false;
+
+//CAN_HandleTypeDef     CanHandle;
+CAN_TxHeaderTypeDef   TxHeader;
+CAN_RxHeaderTypeDef   RxHeader;
+uint8_t               TxData[8];
+uint8_t               RxData[8];
+uint32_t              TxMailbox;
+CAN_FilterTypeDef  sFilterConfig;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -163,7 +170,60 @@ int main(void)
   osThreadSuspend(COMSendTaskHandle);
   
   vUARTCommandConsoleStart();
-  
+  sFilterConfig.FilterBank = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.SlaveStartFilterBank = 14;
+
+  if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
+  {
+
+    Error_Handler();
+  }
+
+  if (HAL_CAN_Start(&hcan) != HAL_OK)
+  {
+    /* Start Error */
+    Error_Handler();
+  }
+
+/*
+  if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
+  {
+      Error_Handler();
+  }
+
+  while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan) != 3) {}
+
+  if(HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0) != 1)
+  {
+
+      Error_Handler();
+  }
+
+  if(HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+  {
+
+      Error_Handler();
+  }
+
+  if((RxHeader.StdId != 0x11)                     ||
+     (RxHeader.RTR != CAN_RTR_DATA)               ||
+     (RxHeader.IDE != CAN_ID_STD)                 ||
+     (RxHeader.DLC != 2)                          ||
+     ((RxData[0]<<8 | RxData[1]) != 0xCAFE))
+  {
+
+      Error_Handler();
+  }
+  */
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
