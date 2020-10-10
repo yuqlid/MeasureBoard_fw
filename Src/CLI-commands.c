@@ -10,6 +10,9 @@
 #include "MeasurementBoard_v1.h"
 #include "scramble_tasks.h"
 #include "can.h"
+#include "i2c.h"
+#include "xprintf.h"
+#include "bq34z100-G1.h"
 
 #include <stdio.h>
 
@@ -163,6 +166,42 @@ static BaseType_t prvCanTest( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	return xReturn;
 }
 
+static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t		RxData[2];
+	uint16_t 	temeprature;
+	uint16_t 	temeprature2;
+	uint16_t 	RxData16;
+	char tempstr[10] = {0};
+
+	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, 0x0C, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+
+	RxData16 = *(uint16_t *)RxData;
+
+	RxData16 -= 2731;
+
+	temeprature = RxData16 / 10;
+	temeprature2 = RxData16 % 10;
+
+	xsprintf(tempstr, "%d.%d", temeprature, temeprature2);
+
+	sprintf( pcWriteBuffer, "Info : " );
+	strncat( pcWriteBuffer, ( char * ) tempstr, strlen( tempstr ) );
+	strncat( pcWriteBuffer, (const char *)(" degC\r\n"), strlen( " degC\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
 	"com_periodic",
@@ -195,6 +234,14 @@ static const CLI_Command_Definition_t xParameterCanTest =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBattInfo =
+{
+	"batt",
+	"\r\nbatt:\r\n Show bq34z100-G1 info\r\n",
+	prvBattInfo, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 
 void vRegisterScrambleCLICommands( void )
 {
@@ -203,4 +250,5 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterSetTargetSPeed );
 	FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
 	FreeRTOS_CLIRegisterCommand( &xParameterCanTest );
+	FreeRTOS_CLIRegisterCommand( &xParameterBattInfo );
 }

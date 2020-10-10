@@ -99,7 +99,8 @@ Src/UARTCommandConsole.c \
 Src/CLI-commands.c \
 Src/scramble_tasks.c \
 FreeRTOS_helpers/port_DRN.c \
-FreeRTOS_helpers/heap_useNewlib_ST.c
+FreeRTOS_helpers/heap_useNewlib_ST.c \
+xprintf/xprintf.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -167,7 +168,8 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 -IMiddlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI \
--IMiddlewares/ST/ARM/DSP/Inc
+-IMiddlewares/ST/ARM/DSP/Inc \
+-Ixprintf
 
 
 # compile gcc flags
