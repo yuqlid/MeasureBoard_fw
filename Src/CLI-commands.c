@@ -85,7 +85,7 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 			//sprintf( pcWriteBuffer, "%d rpm ", ( int ) uxParameterNumber );
 			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
 			strncat( pcWriteBuffer, ( char * ) data, strlen( data ) );
-			strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( " rpm\r\n" ) );
+			strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 			speed = strtol(pcParameter, NULL , 10);
 			setTargetSpeed(&speed);
@@ -122,6 +122,8 @@ static BaseType_t prvEncoderCalibrateCommand( char *pcWriteBuffer, size_t xWrite
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
+
+	sprintf( pcWriteBuffer, "Enocder Calibration\r\n" );
 
     data = 0x01;
 	RS485_Transmit(0x10, 0x30, &data, 1);
@@ -161,6 +163,8 @@ static BaseType_t prvCanTest( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	TxData[7] = 0x07;
 
 	HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
+
+	sprintf( pcWriteBuffer, "CAN Test Message\r\n" );
 
     xReturn = pdFALSE;
 	return xReturn;
