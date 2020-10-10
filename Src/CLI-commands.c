@@ -120,6 +120,25 @@ static BaseType_t prvEncoderCalibrateCommand( char *pcWriteBuffer, size_t xWrite
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
+    data = 0x01;
+	RS485_Transmit(0x10, 0x30, &data, 1);
+    xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvCanTest( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	// xParameterStringLength;
+	BaseType_t xReturn;
+	uint8_t data = 0;
+	//static UBaseType_t uxParameterNumber = 0;
+	static bool state = false;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
 	CAN_TxHeaderTypeDef   TxHeader;
 	uint8_t               TxData[8];
 	uint32_t              TxMailbox;
@@ -140,8 +159,6 @@ static BaseType_t prvEncoderCalibrateCommand( char *pcWriteBuffer, size_t xWrite
 
 	HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
 
-    data = 0x01;
-	RS485_Transmit(0x10, 0x30, &data, 1);
     xReturn = pdFALSE;
 	return xReturn;
 }
@@ -153,7 +170,6 @@ static const CLI_Command_Definition_t xParameterRS485Periodic =
 	prvPS485PeriodicCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
-
 
 static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 {
@@ -171,10 +187,20 @@ static const CLI_Command_Definition_t xParameterEncoderCalibrate =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterCanTest =
+{
+	"can",
+	"\r\ncan:\r\n Transmit Can Test Message\r\n",
+	prvCanTest, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
 	FreeRTOS_CLIRegisterCommand( &xParameterRS485Periodic );
 	FreeRTOS_CLIRegisterCommand( &xParameterSetTargetSPeed );
 	FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
+	FreeRTOS_CLIRegisterCommand( &xParameterCanTest );
 }
