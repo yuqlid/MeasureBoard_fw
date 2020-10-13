@@ -16,6 +16,10 @@
 
 #include <stdio.h>
 
+
+volatile bool FAS = false;
+volatile bool SS = false;
+
 extern osThreadId rs485TransmitTaskHandle;
 
 
@@ -237,6 +241,121 @@ static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	return xReturn;
 }
 
+static BaseType_t prvBatt_GetMode( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t		RxData[2];
+	uint16_t 	temeprature;
+	uint16_t 	temeprature2;
+	uint16_t 	RxData16;
+	uint16_t 	pack_configration;
+	const char *const str_seald = "SEALED State\r\n";
+	const char *const str_unseald = "UNSEALED State\r\n";
+	const char *const str_fullacccess = "FULL ACCESS State\r\n";
+	char *strptr;
+	char configstr[10] = {0};
+	
+	RxData[0] = 0x00;
+	RxData[1] = 0x00;
+	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+
+	FAS = (RxData[1] >> 6) & 0x01;
+	SS = (RxData[1] >> 5) & 0x01;
+
+	if(FAS){
+		if(SS){
+			strptr = str_seald;
+		}else{
+			strptr = str_unseald;
+		}
+	}else{
+		if(!SS){
+			strptr = str_fullacccess;
+		}
+	}
+
+	RxData16 = *(uint16_t *)RxData;
+	xsprintf(configstr, "%x", RxData16);
+
+	sprintf( pcWriteBuffer, "CONTROL_STATUS : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+	if(!(!FAS && SS)){
+		strncat( pcWriteBuffer, ( char * ) strptr, strlen( strptr ) );
+		strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+	}
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBatt_unseal( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	BQ34Z100G1_UNSEAL();
+
+	sprintf( pcWriteBuffer, "unseal cmd sent.\r\n" );
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBatt_seal( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	BQ34Z100G1_SEAL();
+
+	sprintf( pcWriteBuffer, "seal cmd sent.\r\n" );
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBatt_fullaccess( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	if(FAS && !SS){
+		BQ34Z100G1_FULLACCESS();
+		sprintf( pcWriteBuffer, "fullaccess cmd sent.\r\n" );
+	}else{
+		sprintf( pcWriteBuffer, "Current Mode is not UNSEALED State.\r\nChange the Mode to UNSEALED first\r\n" );
+	}
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
 	"com_periodic",
@@ -277,6 +396,37 @@ static const CLI_Command_Definition_t xParameterBattInfo =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBattMode =
+{
+	"batt_mode",
+	"\r\nbatt_mode:\r\n Show bq34z100-G1 CONTROL_STATUS and SECURITY MODE\r\n",
+	prvBatt_GetMode, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterBatt_unseal =
+{
+	"unseal",
+	"\r\nunseal:\r\n bq34z100-G1  set UNSEALED mode\r\n",
+	prvBatt_unseal, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterBatt_seal =
+{
+	"seal",
+	"\r\nseal:\r\n bq34z100-G1  set SEALED mode\r\n",
+	prvBatt_seal, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterBatt_fullaccess =
+{
+	"fullaccess",
+	"\r\nfullaccess:\r\n bq34z100-G1  set FULL ACCESS mode\r\n",
+	prvBatt_fullaccess, /* The function to run. */
+	0 /* No parameters are expected. */
+};
 
 void vRegisterScrambleCLICommands( void )
 {
@@ -286,4 +436,8 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
 	FreeRTOS_CLIRegisterCommand( &xParameterCanTest );
 	FreeRTOS_CLIRegisterCommand( &xParameterBattInfo );
+	FreeRTOS_CLIRegisterCommand( &xParameterBattMode );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_unseal );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_seal );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_fullaccess );
 }

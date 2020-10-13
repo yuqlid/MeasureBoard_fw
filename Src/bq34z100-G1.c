@@ -19,7 +19,18 @@ void BQ34Z100G1_UNSEAL(void){
 
 }
 
-void BQ34Z100G1_SEAL(void){
+void BQ34Z100G1_FULLACCESS(void){
+
+    uint8_t fullacccess1[2] = {0xFF, 0xFF};
+    uint8_t fullacccess2[2] = {0xFF, 0xFF};
+
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, fullacccess1, 2, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, fullacccess2, 2, 1000);
+
+}
+
+
+void BQ34Z100G1_RESET(void){
 
     uint8_t reset[2] = {0x41, 0x00};
 
@@ -27,7 +38,7 @@ void BQ34Z100G1_SEAL(void){
 
 }
 
-void BQ34Z100G1_RESET(void){
+void BQ34Z100G1_SEAL(void){
 
     uint8_t seal[2] = {0x20, 0x00};
 

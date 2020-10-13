@@ -116,6 +116,7 @@ typedef enum {
 */
 void BQ34Z100G1_UNSEAL(void);
 void BQ34Z100G1_SEAL(void);
+void BQ34Z100G1_FULLACCESS(void);
 void BQ34Z100G1_RESET(void);
 void BQ34Z100G1_BlockDataControl(void);
 void BQ34Z100G1_DataFlashClass(void);
