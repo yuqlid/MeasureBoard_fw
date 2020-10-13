@@ -11,38 +11,40 @@
 
 void BQ34Z100G1_UNSEAL(void){
 
-    uint8_t unseal1[2] = {0x14, 0x04};
-    uint8_t unseal2[2] = {0x72, 0x36};
+    uint8_t data[2];
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, unseal1, 2, 1000);
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, unseal2, 2, 1000);
+    data[0] = 0x14;
+    data[1] = 0x04;
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
+    data[0] = 0x72;
+    data[1] = 0x36;
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 
 }
 
 void BQ34Z100G1_FULLACCESS(void){
 
-    uint8_t fullacccess1[2] = {0xFF, 0xFF};
-    uint8_t fullacccess2[2] = {0xFF, 0xFF};
+    uint8_t data[2] = {0xFF, 0xFF};
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, fullacccess1, 2, 1000);
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, fullacccess2, 2, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 
 }
 
-
 void BQ34Z100G1_RESET(void){
 
-    uint8_t reset[2] = {0x41, 0x00};
+    uint8_t data[2] = {0x00, 0x00};
+    *(bq34z100G1_ControlSubcommands *)data = DEVICE_RESET;
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, reset, 2, 1000);
-
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 }
 
 void BQ34Z100G1_SEAL(void){
 
-    uint8_t seal[2] = {0x20, 0x00};
+    uint8_t data[2] = {0x00, 0x00};
+    *(bq34z100G1_ControlSubcommands *)data = SEALED;
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, seal, 2, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 
 }
 

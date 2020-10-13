@@ -355,6 +355,23 @@ static BaseType_t prvBatt_fullaccess( char *pcWriteBuffer, size_t xWriteBufferLe
 	return xReturn;
 }
 
+static BaseType_t prvBatt_reset( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	BQ34Z100G1_RESET();
+
+	sprintf( pcWriteBuffer, "reset cmd sent.\r\n" );
+	xReturn = pdFALSE;
+	return xReturn;
+}
 
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
@@ -420,6 +437,14 @@ static const CLI_Command_Definition_t xParameterBatt_seal =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBatt_reset =
+{
+	"batt_reset",
+	"\r\nbatt_reset:\r\n bq34z100-G1  Reset\r\n",
+	prvBatt_reset, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 static const CLI_Command_Definition_t xParameterBatt_fullaccess =
 {
 	"fullaccess",
@@ -440,4 +465,5 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_unseal );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_seal );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_fullaccess );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_reset );
 }
