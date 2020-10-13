@@ -185,22 +185,53 @@ static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	uint16_t 	temeprature;
 	uint16_t 	temeprature2;
 	uint16_t 	RxData16;
+	uint16_t 	pack_configration;
 	char tempstr[10] = {0};
+	char configstr[10] = {0};
 
-	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, 0x0C, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	RxData[0] = 0x00;
+	RxData[1] = 0x00;
+	//HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	//HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	//HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, &RxData[0], 1, 1000);
+	//HAL_I2C_Master_Receive(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, RxData, 2, 1000);
 
+	//BQ34Z100G1_UNSEAL();
+	
+	/*
 	RxData16 = *(uint16_t *)RxData;
+	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[1], 1, 1000);
+	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[0], 1, 1000);
+	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[1], 1, 1000);
+	*/
+	/*
+	BQ34Z100G1_UNSEAL();
+	BQ34Z100G1_BlockDataControl();
+	BQ34Z100G1_DataFlashClass();
+	BQ34Z100G1_DataFlashBlock();
+	*/
+	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, A_DF, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	pack_configration = *(uint16_t *)RxData;
 
-	RxData16 -= 2731;
+
+	// temeprature measure
+	/*
+	RxData16 = BQ34Z100G1_GetTemprature10degreeCelsius();
 
 	temeprature = RxData16 / 10;
 	temeprature2 = RxData16 % 10;
-
 	xsprintf(tempstr, "%d.%d", temeprature, temeprature2);
+	*/
+
+
+	xsprintf(configstr, "%d", pack_configration);
 
 	sprintf( pcWriteBuffer, "Info : " );
 	strncat( pcWriteBuffer, ( char * ) tempstr, strlen( tempstr ) );
 	strncat( pcWriteBuffer, (const char *)(" degC\r\n"), strlen( " degC\r\n" ) );
+	strncat( pcWriteBuffer, (const char *)("Pack Configuration : "), strlen( "Pack Configuration : " ) );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
 	return xReturn;
