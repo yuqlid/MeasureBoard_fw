@@ -122,6 +122,7 @@ void BQ34Z100G1_BlockDataControl(void);
 void BQ34Z100G1_DataFlashClass(void);
 void BQ34Z100G1_DataFlashBlock(void);
 uint16_t BQ34Z100G1_GetTemprature10degreeCelsius(void);
+uint16_t BQ34Z100G1_GetVoltagemilliV(void);
 
 #ifdef __cplusplus
 }

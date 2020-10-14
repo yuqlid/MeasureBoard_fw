@@ -83,3 +83,15 @@ uint16_t BQ34Z100G1_GetTemprature10degreeCelsius(void){
 
     return temp;
 }
+
+uint16_t BQ34Z100G1_GetVoltagemilliV(void){
+
+    uint8_t RxData[2];
+    uint16_t temp;
+
+    HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, VOLT, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+    temp = *(uint16_t *)RxData;
+	
+
+    return temp;
+}

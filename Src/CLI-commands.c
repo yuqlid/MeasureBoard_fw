@@ -186,53 +186,37 @@ static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	configASSERT( pcWriteBuffer );
 
 	uint8_t		RxData[2];
-	uint16_t 	temeprature;
-	uint16_t 	temeprature2;
-	uint16_t 	RxData16;
 	uint16_t 	pack_configration;
 	char tempstr[10] = {0};
 	char configstr[10] = {0};
 
 	RxData[0] = 0x00;
 	RxData[1] = 0x00;
-	//HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
-	//HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
-	//HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, &RxData[0], 1, 1000);
-	//HAL_I2C_Master_Receive(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, RxData, 2, 1000);
-
-	//BQ34Z100G1_UNSEAL();
+	uint16_t oldchecksum, newchecksum;
+	uint8_t TxData;
+	uint16_t temp;
 	
-	/*
-	RxData16 = *(uint16_t *)RxData;
-	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[1], 1, 1000);
-	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[0], 1, 1000);
-	HAL_I2C_Master_Transmit(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, I2C_MEMADD_SIZE_8BIT, &RxData[1], 1, 1000);
-	*/
-	/*
-	BQ34Z100G1_UNSEAL();
 	BQ34Z100G1_BlockDataControl();
 	BQ34Z100G1_DataFlashClass();
 	BQ34Z100G1_DataFlashBlock();
-	*/
+	
 	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, A_DF, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
 	pack_configration = *(uint16_t *)RxData;
+	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, DFDCKS, I2C_MEMADD_SIZE_8BIT, RxData, 1, 1000);
+	oldchecksum = RxData[0];
 
+	TxData = 0xAE;
+	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, A_DF + 1, I2C_MEMADD_SIZE_8BIT, &TxData, 1, 1000);
+	
+	temp = (255 - oldchecksum - RxData[1]) % 256;
+	newchecksum = 255 - (temp + TxData) % 256;
+	TxData = 0xFF & newchecksum;
 
-	// temeprature measure
-	/*
-	RxData16 = BQ34Z100G1_GetTemprature10degreeCelsius();
+	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, DFDCKS, I2C_MEMADD_SIZE_8BIT, &TxData, 1, 1000);
 
-	temeprature = RxData16 / 10;
-	temeprature2 = RxData16 % 10;
-	xsprintf(tempstr, "%d.%d", temeprature, temeprature2);
-	*/
-
-
-	xsprintf(configstr, "%d", pack_configration);
+	xsprintf(configstr, "0x%X", pack_configration);
 
 	sprintf( pcWriteBuffer, "Info : " );
-	strncat( pcWriteBuffer, ( char * ) tempstr, strlen( tempstr ) );
-	strncat( pcWriteBuffer, (const char *)(" degC\r\n"), strlen( " degC\r\n" ) );
 	strncat( pcWriteBuffer, (const char *)("Pack Configuration : "), strlen( "Pack Configuration : " ) );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
@@ -253,10 +237,7 @@ static BaseType_t prvBatt_GetMode( char *pcWriteBuffer, size_t xWriteBufferLen, 
 	configASSERT( pcWriteBuffer );
 
 	uint8_t		RxData[2];
-	uint16_t 	temeprature;
-	uint16_t 	temeprature2;
-	uint16_t 	RxData16;
-	uint16_t 	pack_configration;
+
 	const char *const str_seald = "SEALED State\r\n";
 	const char *const str_unseald = "UNSEALED State\r\n";
 	const char *const str_fullacccess = "FULL ACCESS State\r\n";
@@ -283,8 +264,7 @@ static BaseType_t prvBatt_GetMode( char *pcWriteBuffer, size_t xWriteBufferLen, 
 		}
 	}
 
-	RxData16 = *(uint16_t *)RxData;
-	xsprintf(configstr, "%x", RxData16);
+	xsprintf(configstr, "0x%X", *(uint16_t *)RxData);
 
 	sprintf( pcWriteBuffer, "CONTROL_STATUS : " );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
@@ -373,6 +353,30 @@ static BaseType_t prvBatt_reset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 	return xReturn;
 }
 
+static BaseType_t prvBatt_volt( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	uint16_t voltage;
+	char configstr[10] = {0};
+
+	voltage = BQ34Z100G1_GetVoltagemilliV();
+
+	xsprintf(configstr, "%d mV", voltage);
+
+	sprintf( pcWriteBuffer, "Batt Voltage : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
 	"com_periodic",
@@ -453,6 +457,14 @@ static const CLI_Command_Definition_t xParameterBatt_fullaccess =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBatt_volt =
+{
+	"volt",
+	"\r\nvolt:\r\n bq34z100-G1  show batt voltage\r\n",
+	prvBatt_volt, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
@@ -466,4 +478,5 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_seal );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_fullaccess );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_reset );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_volt );
 }
