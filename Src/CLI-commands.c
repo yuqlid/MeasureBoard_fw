@@ -197,25 +197,20 @@ static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	uint16_t temp;
 	
 	BQ34Z100G1_BlockDataControl();
-	BQ34Z100G1_DataFlashClass();
-	BQ34Z100G1_DataFlashBlock();
+	BQ34Z100G1_DataFlashClass(0x40);
+	BQ34Z100G1_DataFlashBlock(0x00);
 	
-	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, A_DF, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	BQ34Z100G1_Read(A_DF + 1, RxData, 2);
 	pack_configration = *(uint16_t *)RxData;
-	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, DFDCKS, I2C_MEMADD_SIZE_8BIT, RxData, 1, 1000);
-	oldchecksum = RxData[0];
 
-	TxData = 0xAE;
-	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, A_DF + 1, I2C_MEMADD_SIZE_8BIT, &TxData, 1, 1000);
-	
-	temp = (255 - oldchecksum - RxData[1]) % 256;
-	newchecksum = 255 - (temp + TxData) % 256;
+	oldchecksum = BQ34Z100G1_BlockDataChecksum_Read();
+
+	temp = (255 - oldchecksum - RxData[1]) & 0xFF;
+	newchecksum = 255 - ((temp + TxData) & 0xFF );
 	TxData = 0xFF & newchecksum;
-
-	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, DFDCKS, I2C_MEMADD_SIZE_8BIT, &TxData, 1, 1000);
+	BQ34Z100G1_BlockDataChecksum_Write(TxData);
 
 	xsprintf(configstr, "0x%X", pack_configration);
-
 	sprintf( pcWriteBuffer, "Info : " );
 	strncat( pcWriteBuffer, (const char *)("Pack Configuration : "), strlen( "Pack Configuration : " ) );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
@@ -273,6 +268,48 @@ static BaseType_t prvBatt_GetMode( char *pcWriteBuffer, size_t xWriteBufferLen, 
 		strncat( pcWriteBuffer, ( char * ) strptr, strlen( strptr ) );
 		strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 	}
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBattSerialNum( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t		RxData[2];
+
+	char serialnum[20] = {0};
+	char serialnum2[20] = {0};
+	
+	RxData[0] = 0x00;
+	RxData[1] = 0x00;
+	BQ34Z100G1_Read(SERNUM, RxData, 2);
+	
+	xsprintf(serialnum, "0x%X", *(uint16_t *)RxData);
+
+	BQ34Z100G1_BlockDataControl();
+
+	BQ34Z100G1_DataFlashClass(48);
+	BQ34Z100G1_DataFlashBlock(0x00);
+	osDelay(1);
+
+	BQ34Z100G1_Read(0x44 + 1, RxData, 2);
+
+	xsprintf(serialnum2, "0x%X", *(uint16_t *)RxData);
+
+	sprintf( pcWriteBuffer, "Serial Number : " );
+	strncat( pcWriteBuffer, ( char * ) serialnum, strlen( serialnum ) );
+	strncat( pcWriteBuffer, ( char * ) ", ", strlen( ", " ) );
+	strncat( pcWriteBuffer, ( char * ) serialnum2, strlen( serialnum2 ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
 	xReturn = pdFALSE;
 	return xReturn;
 }
@@ -377,6 +414,57 @@ static BaseType_t prvBatt_volt( char *pcWriteBuffer, size_t xWriteBufferLen, con
 	return xReturn;
 }
 
+static BaseType_t prvBattTI( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t	RxData[11] = {0};
+	uint8_t	lion[4] = {0};
+	uint16_t 	pack_configration;
+	char tempstr[10] = {0};
+	char configstr[10] = {0};
+
+	uint16_t oldchecksum, newchecksum;
+	uint8_t TxData;
+	uint16_t temp;
+	
+	sprintf( pcWriteBuffer, "Device Name : " );
+
+	BQ34Z100G1_BlockDataControl();
+
+	BQ34Z100G1_DataFlashClass(48);
+	
+	BQ34Z100G1_DataFlashBlock(0x01);
+	osDelay(1);
+
+	BQ34Z100G1_Read(0x40, RxData, 11);
+
+	strncat( pcWriteBuffer, ( char * ) RxData, 11);
+
+	BQ34Z100G1_Read(0x57 + 1, lion, 4);
+	BQ34Z100G1_Read(0x4B + 1, RxData, 11);
+	
+	strncat( pcWriteBuffer, (const char *)("\r\nDevice evChemistry : "), strlen("\r\nDevice evChemistry : ") );
+	strncat( pcWriteBuffer, ( char * ) lion, 4 );
+	strncat( pcWriteBuffer, (const char *)("\r\nManufacturer Name : "), strlen("\r\nManufacturer Name : " ) );
+	strncat( pcWriteBuffer, ( char * ) RxData, 11);
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+	
+	BQ34Z100G1_DataFlashClass(60);
+	BQ34Z100G1_DataFlashBlock(0x00);
+	osDelay(1);
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
 	"com_periodic",
@@ -465,6 +553,22 @@ static const CLI_Command_Definition_t xParameterBatt_volt =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBatt_ti =
+{
+	"ti",
+	"\r\nti:\r\n bq34z100-G1  show TI\r\n",
+	prvBattTI, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterBatt_seaial =
+{
+	"serial",
+	"\r\nti:\r\n bq34z100-G1  show serial number\r\n",
+	prvBattSerialNum, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
@@ -479,4 +583,6 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_fullaccess );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_reset );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_volt );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_ti );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_seaial );
 }

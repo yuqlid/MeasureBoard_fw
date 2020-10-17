@@ -114,15 +114,19 @@ typedef enum {
     R_a0x
 } bq34z100G1_DataFlashSubClass;
 */
+void BQ34Z100G1_Read(uint8_t addr, uint8_t *pData, uint16_t len);
+void BQ34Z100G1_Write(uint8_t addr, uint8_t *pData, uint16_t len);
 void BQ34Z100G1_UNSEAL(void);
 void BQ34Z100G1_SEAL(void);
 void BQ34Z100G1_FULLACCESS(void);
 void BQ34Z100G1_RESET(void);
 void BQ34Z100G1_BlockDataControl(void);
-void BQ34Z100G1_DataFlashClass(void);
-void BQ34Z100G1_DataFlashBlock(void);
+void BQ34Z100G1_DataFlashClass(uint8_t data);
+void BQ34Z100G1_DataFlashBlock(uint8_t data);
 uint16_t BQ34Z100G1_GetTemprature10degreeCelsius(void);
 uint16_t BQ34Z100G1_GetVoltagemilliV(void);
+uint8_t BQ34Z100G1_BlockDataChecksum_Read(void);
+void BQ34Z100G1_BlockDataChecksum_Write(uint8_t data);
 
 #ifdef __cplusplus
 }
