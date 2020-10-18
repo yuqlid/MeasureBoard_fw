@@ -417,8 +417,9 @@ static BaseType_t prvBatt_volt( char *pcWriteBuffer, size_t xWriteBufferLen, con
 	BQ34Z100G1_DataFlashBlock(0x00);
 	osDelay(1);
 
-	BQ34Z100G1_Read(0x40, RxData, 16);
-	xsprintf(configstr, "%d", *(uint16_t *)RxData);
+	BQ34Z100G1_Read(0x40 + 14, RxData, 2);
+	voltage = RxData[0] << 8 | RxData[1];
+	xsprintf(configstr, "%d", voltage);
 
 	sprintf( pcWriteBuffer, "Volgate Div : " );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
