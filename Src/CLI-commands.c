@@ -10,7 +10,7 @@
 #include "MeasurementBoard_v1.h"
 #include "scramble_tasks.h"
 #include "can.h"
-#include "i2c.h"
+//#include "i2c.h"
 #include "xprintf.h"
 #include "bq34z100-G1.h"
 
@@ -199,18 +199,22 @@ static BaseType_t prvBattInfo( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	BQ34Z100G1_BlockDataControl();
 	BQ34Z100G1_DataFlashClass(0x40);
 	BQ34Z100G1_DataFlashBlock(0x00);
+	osDelay(1);
 	
-	BQ34Z100G1_Read(A_DF + 1, RxData, 2);
+	BQ34Z100G1_Read(A_DF + 4 + 1, RxData, 1);
 	pack_configration = *(uint16_t *)RxData;
 
 	oldchecksum = BQ34Z100G1_BlockDataChecksum_Read();
+	
+	TxData = 0x43;
+	BQ34Z100G1_Write(A_DF + 4 + 1,  &TxData, 1);
 
-	temp = (255 - oldchecksum - RxData[1]) & 0xFF;
+	temp = (255 - oldchecksum - RxData[0]) & 0xFF;
 	newchecksum = 255 - ((temp + TxData) & 0xFF );
 	TxData = 0xFF & newchecksum;
 	BQ34Z100G1_BlockDataChecksum_Write(TxData);
 
-	xsprintf(configstr, "0x%X", pack_configration);
+	xsprintf(configstr, "0x%X", RxData[0]);
 	sprintf( pcWriteBuffer, "Info : " );
 	strncat( pcWriteBuffer, (const char *)("Pack Configuration : "), strlen( "Pack Configuration : " ) );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
@@ -241,8 +245,10 @@ static BaseType_t prvBatt_GetMode( char *pcWriteBuffer, size_t xWriteBufferLen, 
 	
 	RxData[0] = 0x00;
 	RxData[1] = 0x00;
-	HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
-	HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	BQ34Z100G1_Write(CONTROL, RxData, 2);
+	BQ34Z100G1_Read(CONTROL, RxData, 2);
+	//HAL_I2C_Mem_Write(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
+	//HAL_I2C_Mem_Read(&hi2c1, BQ34Z100G1_I2C_ADDR << 1, CONTROL, I2C_MEMADD_SIZE_8BIT, RxData, 2, 1000);
 
 	FAS = (RxData[1] >> 6) & 0x01;
 	SS = (RxData[1] >> 5) & 0x01;
@@ -401,13 +407,20 @@ static BaseType_t prvBatt_volt( char *pcWriteBuffer, size_t xWriteBufferLen, con
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 	uint16_t voltage;
+	uint8_t	RxData[16] = {0};
 	char configstr[10] = {0};
 
 	voltage = BQ34Z100G1_GetVoltagemilliV();
 
-	xsprintf(configstr, "%d mV", voltage);
+	BQ34Z100G1_BlockDataControl();
+	BQ34Z100G1_DataFlashClass(104);
+	BQ34Z100G1_DataFlashBlock(0x00);
+	osDelay(1);
 
-	sprintf( pcWriteBuffer, "Batt Voltage : " );
+	BQ34Z100G1_Read(0x40, RxData, 16);
+	xsprintf(configstr, "%d", *(uint16_t *)RxData);
+
+	sprintf( pcWriteBuffer, "Volgate Div : " );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 	xReturn = pdFALSE;
@@ -456,10 +469,36 @@ static BaseType_t prvBattTI( char *pcWriteBuffer, size_t xWriteBufferLen, const 
 	strncat( pcWriteBuffer, (const char *)("\r\nManufacturer Name : "), strlen("\r\nManufacturer Name : " ) );
 	strncat( pcWriteBuffer, ( char * ) RxData, 11);
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBattled( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t	RxData[11] = {0};
+	char configstr[10] = {0};
 	
-	BQ34Z100G1_DataFlashClass(60);
+	BQ34Z100G1_BlockDataControl();
+	BQ34Z100G1_DataFlashClass(67);
 	BQ34Z100G1_DataFlashBlock(0x00);
 	osDelay(1);
+
+	BQ34Z100G1_Read(0x40, RxData, 1);
+
+	xsprintf(configstr, "0x%X", RxData[0]);
+	sprintf( pcWriteBuffer, "LED Hold Time : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
 	return xReturn;
@@ -569,6 +608,14 @@ static const CLI_Command_Definition_t xParameterBatt_seaial =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBatt_led =
+{
+	"led",
+	"\r\nled:\r\n bq34z100-G1  show LED Hold Time\r\n",
+	prvBattled, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
@@ -585,4 +632,5 @@ void vRegisterScrambleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_volt );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_ti );
 	FreeRTOS_CLIRegisterCommand( &xParameterBatt_seaial );
+	FreeRTOS_CLIRegisterCommand( &xParameterBatt_led );
 }
