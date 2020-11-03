@@ -15,6 +15,7 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	// xParameterStringLength;
 	BaseType_t xReturn;
 	uint16_t data = 0;
+	uint16_t txdata = 0;
     char str[10] = {0};
     //static UBaseType_t uxParameterNumber = 0;
 	//static bool state = false;
@@ -24,8 +25,10 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	configASSERT( pcWriteBuffer );
 
     //data = MA7xx_GetAngle();
-    HAL_SPI_Receive(&hspi1, &data, 1, 100);
-    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, RESET);
+	HAL_SPI_Receive(&hspi1, &data, 1, 100);
+    //HAL_SPI_TransmitReceive(&hspi1, &txdata, &data, 1, 100);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
     xsprintf(str, "%d", data);
 
     sprintf( pcWriteBuffer, "Angle = " );

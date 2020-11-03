@@ -168,7 +168,7 @@ int main(void)
   vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
   vRegisterMA7xxCLICommands();
-  
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
   scramble_RegisterTasks();
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
