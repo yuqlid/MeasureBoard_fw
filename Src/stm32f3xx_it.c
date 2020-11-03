@@ -169,6 +169,20 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line2 and Touch Sense controller.
+  */
+void EXTI2_TSC_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_TSC_IRQn 0 */
+
+  /* USER CODE END EXTI2_TSC_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+  /* USER CODE BEGIN EXTI2_TSC_IRQn 1 */
+
+  /* USER CODE END EXTI2_TSC_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 channel2 global interrupt.
   */
 void DMA1_Channel2_IRQHandler(void)
