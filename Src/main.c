@@ -151,6 +151,7 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, RESET);
   setbuf(stdout, NULL );
   //UART_Util_Init(&huart1);
@@ -169,7 +170,6 @@ int main(void)
   vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
   vRegisterMA7xxCLICommands();
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
   HEDL5540_Encoder_Init(&htim2);
   scramble_RegisterTasks();
   osThreadSuspend(rs485TransmitTaskHandle);

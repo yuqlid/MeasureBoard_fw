@@ -45,6 +45,44 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	return xReturn;
 }
 
+static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	// xParameterStringLength;
+	BaseType_t xReturn;
+	uint16_t rxdata[2] = {0};
+	uint16_t txdata[2] = {16384, 0};
+    char str[10] = {0};
+	uint16_t offset = 0;
+    //static UBaseType_t uxParameterNumber = 0;
+	//static bool state = false;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, RESET);
+    HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+
+	offset = rxdata[1] >> 8;
+	txdata[0] = 16640;
+
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, RESET);
+    HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+
+	rxdata[1] &= 0xFF00;
+	offset |= rxdata[1];
+    xsprintf(str, "%d", offset);
+
+    sprintf( pcWriteBuffer, "Offset = " );
+    strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
+    strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	return xReturn;
+}
+
 
 static const CLI_Command_Definition_t xParameterMA7xx_ReadPos =
 {
@@ -54,10 +92,19 @@ static const CLI_Command_Definition_t xParameterMA7xx_ReadPos =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterMA7xx_ReadOffset =
+{
+	"r_offset",
+	"\r\nr_offset:\r\n Read MA7xx Zero Position Angle\r\n",
+	prvReadOffset, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 
 void vRegisterMA7xxCLICommands( void ){
 
     
     FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_ReadPos );
+	FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_ReadOffset );
 
 }
