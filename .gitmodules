@@ -1,0 +1,3 @@
+[submodule "FreeRTOS_helpers"]
+	path = FreeRTOS_helpers
+	url = git@github.com:DRNadler/FreeRTOS_helpers.git
