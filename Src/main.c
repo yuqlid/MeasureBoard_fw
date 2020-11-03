@@ -34,6 +34,8 @@
 #include <stdbool.h>
 #include "MeasurementBoard_v1.h"
 #include "CLI-commands.h"
+#include "CLI-commands_bq34Z100-G1.h"
+#include "CLI-commands_MA7xx.h"
 #include "scramble_tasks.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
@@ -155,7 +157,7 @@ int main(void)
   //HAL_UART_Transmit(&huart1, &a, 1, 100);
   printf("\r\n%s,%s\r\n",__DATE__,__TIME__);
   printf("MeasurementBoard_fw\r\n");
-  Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
+  // Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
@@ -164,10 +166,14 @@ int main(void)
   respectively. */
   vRegisterSampleCLICommands();
   vRegisterScrambleCLICommands();
+  //vRegisterbq34z100G1CLICommands();
+  vRegisterMA7xxCLICommands();
   
   scramble_RegisterTasks();
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
+  osThreadSuspend(EncoderProcessTaskHandle);
+
   
   vUARTCommandConsoleStart();
   sFilterConfig.FilterBank = 0;

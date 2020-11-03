@@ -13,6 +13,7 @@
 
 #include "main.h" //CubeMXでピンをUserdefienしたため読んでる．今後はCubeMXで定義せずにBSPのヘッダファイルで定義したほうが良いかもしれない
 #include "gpio.h"
+#include "can.h"
 
 typedef enum
 {
