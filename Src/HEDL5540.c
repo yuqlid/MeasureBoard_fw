@@ -19,7 +19,7 @@ void HEDL5540_Encoder_Init(TIM_HandleTypeDef* htim){
 uint32_t GetCount_raw(void){
     return  htim_hedl5540->Instance->CNT;
 }
-
+/*
 float GetAngle_deg(void){
     return 0;
 }
@@ -27,3 +27,4 @@ float GetAngle_deg(void){
 float GetANgle_rad(void){
     return 0;
 }
+*/

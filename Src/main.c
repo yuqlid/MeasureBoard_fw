@@ -40,6 +40,7 @@
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
+#include "HEDL5540.h"
 
 #include "FreeRTOS_CLI.h"
 //#include "UART-interrupt-driven-command-console.h"
@@ -169,6 +170,7 @@ int main(void)
   //vRegisterbq34z100G1CLICommands();
   vRegisterMA7xxCLICommands();
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+  HEDL5540_Encoder_Init(&htim2);
   scramble_RegisterTasks();
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
