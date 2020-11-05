@@ -16,7 +16,6 @@ jobs:
       with:
         release: '9-2019-q4' # The arm-none-eabi-gcc release to use.
     - uses: actions/checkout@v2
-      with:
-        submodules: 'true'
+    - run: git submodule update --remote
     - run: echo $GITHUB_WORKSPACE
     - run: make
