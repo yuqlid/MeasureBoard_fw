@@ -10,8 +10,6 @@
 #include "MA7xx.h"
 #include "HEDL5540.h"
 
-#define CMD_W   0x8000
-#define CMD_R   0x4000
 
 static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
@@ -64,12 +62,12 @@ static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
-	txdata[0] = CMD_R | 0x0000;
+	txdata[0] = CMD_R | Z_7_0;
 
     HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
 
 	offset = rxdata[1] >> 8;
-	txdata[0] = CMD_R | 0x0100;
+	txdata[0] = CMD_R | Z_15_8;
 
     HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
 
@@ -90,7 +88,7 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
     BaseType_t xParameterStringLength;
     BaseType_t xReturn;
     uint16_t rxdata[2] = {0};
-    uint16_t txdata[2] = {CMD_W | 0x00, 0};
+    uint16_t txdata[2] = {CMD_W | Z_7_0, 0};
     char str[10] = {0};
     long offset = 0;
     static UBaseType_t uxParameterNumber = 0;
@@ -130,7 +128,7 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
 
             osDelay(20);
 
-            txdata[0] = CMD_W | 0x0100;
+            txdata[0] = CMD_W | Z_15_8;
             txdata[1] = offset & 0xFF00;
             HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
 
@@ -329,7 +327,7 @@ static const CLI_Command_Definition_t xParameterMA7xx_WriteOffset =
     "wo",
     "\r\nwo:\r\n Write MA7xx Zero Position Angle\r\n",
     prvWriteOffset, /* The function to run. */
-    1 /* No parameters are expected. */
+    1 /* Onw parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xParameterMA7xx_ReadRegister =
@@ -337,7 +335,7 @@ static const CLI_Command_Definition_t xParameterMA7xx_ReadRegister =
     "r",
     "\r\nr:\r\n Write MA7xx Register\r\n",
     prvReadRegister, /* The function to run. */
-    1 /* No parameters are expected. */
+    1 /* Onw parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xParameterMA7xx_WriteRegister =
@@ -345,7 +343,7 @@ static const CLI_Command_Definition_t xParameterMA7xx_WriteRegister =
     "w",
     "\r\nw:\r\n Write MA7xx Register\r\n",
     prvWriteRegister, /* The function to run. */
-    2 /* No parameters are expected. */
+    2 /* Two parameters are expected. */
 };
 
 void vRegisterMA7xxCLICommands( void ){

@@ -13,6 +13,14 @@
 
 #include "spi.h"
 
+#include "encoder_conf.h"
+
+#include ENC_HEADER
+
+#ifndef ENCODER_NAME
+#error "No encoder name set"
+#endif
+
 uint16_t MA7xx_GetAngle(void);
 
 
