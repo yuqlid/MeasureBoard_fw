@@ -8,7 +8,7 @@
 #include "CLI-commands_MA7xx.h"
 #include "xprintf.h"
 #include "MA7xx.h"
-#include "HEDL5540.h"
+// /#include "HEDL5540.h"
 
 
 static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
@@ -33,16 +33,17 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	HAL_SPI_Receive(&hspi1, &data, 1, 100);
     //HAL_SPI_TransmitReceive(&hspi1, &txdata, &data, 1, 100);
     //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
-	encdata = GetCount_raw();
+	//encdata = GetCount_raw();
     xsprintf(str, "%d", data);
-	xsprintf(str2, "%d", encdata);
+	//xsprintf(str2, "%d", encdata);
 
     sprintf( pcWriteBuffer, "Angle = " );
     strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
-    strncat( pcWriteBuffer, (const char *)("\r\nENC = "), strlen( "\r\nENC = " ) );
-    strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+    //strncat( pcWriteBuffer, (const char *)("\r\nENC = "), strlen( "\r\nENC = " ) );
+    //strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
     strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
+    xReturn = pdFALSE;
 	return xReturn;
 }
 
@@ -168,7 +169,7 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
     configASSERT( pcWriteBuffer );
 
     if(uxParameterNumber == 0){
-        sprintf( pcWriteBuffer, "MA7xx Read\r\n");
+        sprintf( pcWriteBuffer, "MA7xx Register Read\r\n");
         uxParameterNumber = 1;
         xReturn = pdPASS;
     }else{
@@ -180,8 +181,7 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
         );
 
         if(pcParameter != NULL){
-            /* Return the parameter string. */
-            
+
             offset = strtol(pcParameter, NULL , 10);
             txdata[0] = CMD_R | (0xFF00 & (offset << 8));
             HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
@@ -233,7 +233,7 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
     configASSERT( pcWriteBuffer );
 
     if(uxParameterNumber == 0){
-        sprintf( pcWriteBuffer, "MA7xx Register :" );
+        sprintf( pcWriteBuffer, "MA7xx Register Write\r\n");
         uxParameterNumber = 1;
         xReturn = pdPASS;
     }else{
@@ -244,42 +244,42 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
                             &xParameterStringLength    /* Store the parameter string length. */
         );
 
-        //if(pcParameter != NULL){
-            /* Return the parameter string. */
-			if(uxParameterNumber == 1){
-				offset = strtol(pcParameter, NULL , 10);
-				txdata = CMD_W | (0xFF00 & (offset << 8));
-				strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-			}
-			if(uxParameterNumber == 2){
-				registerdata = strtol(pcParameter, NULL , 10);
-				txdata |= (0xFF & registerdata);
-				HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
+        if(uxParameterNumber == 1){
+            offset = strtol(pcParameter, NULL , 10);
+            txdata = CMD_W | (0xFF00 & (offset << 8));
+            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
 
-				osDelay(20);
+            sprintf( pcWriteBuffer, "Register : ");
+            strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
 
-				HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
-				data = 0xFF & (rxdata >> 8);
-				
-				xsprintf(str, "%d", data);
-				xsprintf(str2, "%d", txdata & 0xFF);
-				//sprintf( pcWriteBuffer, "Register " );
-				strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-				strncat( pcWriteBuffer, (const char *)(" New val : "), strlen( " New val : " ) );
-				strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
-				strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-				strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
-				strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-			}
+        }
+        if(uxParameterNumber == 2){
+            registerdata = strtol(pcParameter, NULL , 10);
+            txdata |= (0xFF & registerdata);
+            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
+
+            osDelay(20);
+
+            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
+            data = 0xFF & (rxdata >> 8);
+            
+            xsprintf(str, "0x%02x", data);
+            xsprintf(str2, "0x%02x", txdata & 0xFF);
+
+            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+            strncat( pcWriteBuffer, (const char *)(" New val : "), strlen( " New val : " ) );
+            strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+            strncat( pcWriteBuffer, (const char *)(" Verify val : "), strlen( " Verify val : " ) );
+            strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+            strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+        }
         if(uxParameterNumber == 3){
 
 			/* No more parameters were found.  Make sure the write buffer does
             not contain a valid string. */
             pcWriteBuffer[ 0 ] = 0x00;
-
             /* No more data to return. */
             xReturn = pdFALSE;
-
             /* Start over the next time this command is executed. */
             uxParameterNumber = 0;
 

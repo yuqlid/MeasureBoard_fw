@@ -170,8 +170,9 @@ int main(void)
   vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
   vRegisterMA7xxCLICommands();
-  HEDL5540_Encoder_Init(&htim2);
+  //HEDL5540_Encoder_Init(&htim2);
   scramble_RegisterTasks();
+  
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
   osThreadSuspend(EncoderProcessTaskHandle);
