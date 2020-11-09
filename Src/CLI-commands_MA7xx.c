@@ -159,18 +159,16 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
     uint16_t rxdata[2] = {0};
     int16_t txdata[2] = {0};
     char str[10] = {0};
-	char str2[10] = {0};
     long offset = 0;
 	uint16_t data = 0;
     static UBaseType_t uxParameterNumber = 0;
-    //static bool state = false;
 
     ( void ) pcCommandString;
     ( void ) xWriteBufferLen;
     configASSERT( pcWriteBuffer );
 
     if(uxParameterNumber == 0){
-        sprintf( pcWriteBuffer, "MA7xx Register :" );
+        sprintf( pcWriteBuffer, "MA7xx Read\r\n");
         uxParameterNumber = 1;
         xReturn = pdPASS;
     }else{
@@ -183,25 +181,15 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
 
         if(pcParameter != NULL){
             /* Return the parameter string. */
-            //char data[] = " rpm";
-            //memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-            //sprintf( pcWriteBuffer, "%d rpm ", ( int ) uxParameterNumber );
-            //strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-            //strncat( pcWriteBuffer, ( char * ) data, strlen( data ) );
-            //strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-
+            
             offset = strtol(pcParameter, NULL , 10);
-
             txdata[0] = CMD_R | (0xFF00 & (offset << 8));
-
             HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
 			data = (rxdata[1] & 0xFF00) >> 8;
-            //rxdata[1] &= 0xFF00;
-            //offset |= rxdata[1];
-            
-            xsprintf(str, "%d", data);
+            xsprintf(str, "0x%02x", data);
 
-            //sprintf( pcWriteBuffer, "Register " );
+            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+            sprintf( pcWriteBuffer, "Register : ");
 			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
 			strncat( pcWriteBuffer, (const char *)(" val : "), strlen( " val : " ) );
             strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
@@ -218,7 +206,6 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
 
             /* No more data to return. */
             xReturn = pdFALSE;
-
             /* Start over the next time this command is executed. */
             uxParameterNumber = 0;
         }
