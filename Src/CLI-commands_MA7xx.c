@@ -84,11 +84,14 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
     const char *pcParameter;
     BaseType_t xParameterStringLength;
     BaseType_t xReturn;
-    uint16_t rxdata[2] = {0};
-    uint16_t txdata[2] = {CMD_W | Z_7_0, 0};
+    uint16_t rxdata = 0;
+    uint16_t txdata = 0;
     char str[10] = {0};
     long offset = 0;
+    uint16_t data = 0;
     static UBaseType_t uxParameterNumber = 0;
+    //char str[10] = {0};
+	char str2[10] = {0};
     //static bool state = false;
 
     ( void ) pcCommandString;
@@ -96,7 +99,7 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
     configASSERT( pcWriteBuffer );
 
     if(uxParameterNumber == 0){
-        sprintf( pcWriteBuffer, "MA7xx Write Offset\r\n");
+        sprintf( pcWriteBuffer, "MA7xx Write Position Offset\r\n");
         uxParameterNumber = 1;
         xReturn = pdPASS;
     }else{
@@ -108,26 +111,31 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
         );
 
         if(pcParameter != NULL){
-            /* Return the parameter string. */
-            //char data[] = " rpm";
-            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-            //sprintf( pcWriteBuffer, "%d rpm ", ( int ) uxParameterNumber );
-            strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-            //strncat( pcWriteBuffer, ( char * ) data, strlen( data ) );
-            strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
             offset = strtol(pcParameter, NULL , 10);
-            //setTargetSpeed(&speed);
 
-            txdata[1] = (offset & 0xFF) << 8;
-
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
-
+            txdata = CMD_W | Z_7_0 | (0x00FF & offset);
+            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
             osDelay(20);
+            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
+            data = 0xFF & (rxdata >> 8);
 
-            txdata[0] = CMD_W | Z_15_8;
-            txdata[1] = offset & 0xFF00;
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
+            txdata = CMD_W | Z_15_8 | (0x00FF & (offset >> 8));
+            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
+            osDelay(20);
+            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
+            data |= rxdata;
+
+            xsprintf(str, "%5d", offset);
+            xsprintf(str2, "%5d", data);
+
+            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+            sprintf( pcWriteBuffer, "New OffSet : ");
+            //strncat( pcWriteBuffer, (const char *)(" New OffSet : "), strlen( " New OffSet : " ) );
+            strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
+            strncat( pcWriteBuffer, (const char *)("\r\nVerify OffSet : "), strlen( "\r\nVerify OffSet : " ) );
+            strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+            strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
             /* There might be more parameters to return after this one. */
             xReturn = pdTRUE;
@@ -143,21 +151,6 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
 
             /* Start over the next time this command is executed. */
             uxParameterNumber = 0;
-        }
-        if(uxParameterNumber == 3){
-
-			/* No more parameters were found.  Make sure the write buffer does
-            not contain a valid string. */
-            pcWriteBuffer[ 0 ] = 0x00;
-            /* No more data to return. */
-            xReturn = pdFALSE;
-            /* Start over the next time this command is executed. */
-            uxParameterNumber = 0;
-
-        }else{
-            /* There might be more parameters to return after this one. */
-            xReturn = pdTRUE;
-            uxParameterNumber++;
         }
     }
     return xReturn;
