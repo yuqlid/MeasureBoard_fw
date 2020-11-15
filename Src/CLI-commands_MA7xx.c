@@ -22,25 +22,18 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	char str2[20] = {0};
 	uint32_t encdata = 0;
     //static UBaseType_t uxParameterNumber = 0;
-	//static bool state = false;
 
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
-    //data = MA7xx_GetAngle();
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, RESET);
 	HAL_SPI_Receive(&hspi1, &data, 1, 100);
-    //HAL_SPI_TransmitReceive(&hspi1, &txdata, &data, 1, 100);
-    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
-	//encdata = GetCount_raw();
-    xsprintf(str, "%d", data);
-	//xsprintf(str2, "%d", encdata);
 
-    sprintf( pcWriteBuffer, "Angle = " );
+    xsprintf(str, "%d", data);
+
+    memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+    sprintf( pcWriteBuffer, "MA7xx Current Position\r\nPosition : ");
     strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
-    //strncat( pcWriteBuffer, (const char *)("\r\nENC = "), strlen( "\r\nENC = " ) );
-    //strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
     strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
     xReturn = pdFALSE;
@@ -53,7 +46,7 @@ static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 	// xParameterStringLength;
 	BaseType_t xReturn;
 	uint16_t rxdata[2] = {0};
-	uint16_t txdata[2] = {16384, 0};
+	uint16_t txdata[2] = {0};
     char str[10] = {0};
 	uint16_t offset = 0;
     //static UBaseType_t uxParameterNumber = 0;
@@ -74,12 +67,15 @@ static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 
 	rxdata[1] &= 0xFF00;
 	offset |= rxdata[1];
+
     xsprintf(str, "%d", offset);
 
-    sprintf( pcWriteBuffer, "Offset = " );
+    memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+    sprintf( pcWriteBuffer, "MA7xx Position Offset\r\nOffset : ");
     strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
     strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
+    xReturn = pdFALSE;
 	return xReturn;
 }
 
@@ -100,7 +96,7 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
     configASSERT( pcWriteBuffer );
 
     if(uxParameterNumber == 0){
-        sprintf( pcWriteBuffer, "New MA7xx Offset :" );
+        sprintf( pcWriteBuffer, "MA7xx Write Offset\r\n");
         uxParameterNumber = 1;
         xReturn = pdPASS;
     }else{
@@ -147,6 +143,21 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
 
             /* Start over the next time this command is executed. */
             uxParameterNumber = 0;
+        }
+        if(uxParameterNumber == 3){
+
+			/* No more parameters were found.  Make sure the write buffer does
+            not contain a valid string. */
+            pcWriteBuffer[ 0 ] = 0x00;
+            /* No more data to return. */
+            xReturn = pdFALSE;
+            /* Start over the next time this command is executed. */
+            uxParameterNumber = 0;
+
+        }else{
+            /* There might be more parameters to return after this one. */
+            xReturn = pdTRUE;
+            uxParameterNumber++;
         }
     }
     return xReturn;
