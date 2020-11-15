@@ -36,6 +36,7 @@
 #include "CLI-commands.h"
 #include "CLI-commands_bq34Z100-G1.h"
 #include "CLI-commands_MA7xx.h"
+#include "CLI-commands_as5048a.h"
 #include "scramble_tasks.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
@@ -163,13 +164,14 @@ int main(void)
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
-
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
   vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
-  vRegisterMA7xxCLICommands();
+  //vRegisterMA7xxCLICommands();
+  vRegisteras5048aCLICommands();
   //HEDL5540_Encoder_Init(&htim2);
   scramble_RegisterTasks();
   
