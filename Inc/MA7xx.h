@@ -21,8 +21,10 @@
 #error "No encoder name set"
 #endif
 
-uint16_t MA7xx_GetAngle(void);
+uint16_t (*MA7xx_GetAngle)(void);
+uint8_t (*MA7xx_ReadRegister)(uint8_t);
 
+void Encoder_Init_MA7xx(void);
 
 #ifdef __cplusplus
 }

@@ -20,16 +20,16 @@ static BaseType_t prvReadPos( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	uint16_t txdata = 0;
     char str[10] = {0};
 	char str2[20] = {0};
-	uint32_t encdata = 0;
+	uint16_t pos = 0;
     //static UBaseType_t uxParameterNumber = 0;
 
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
-	HAL_SPI_Receive(&hspi1, &data, 1, 100);
+    pos = MA7xx_GetAngle();
 
-    xsprintf(str, "%d", data);
+    xsprintf(str, "%d", pos);
 
     memset( pcWriteBuffer, 0x00, xWriteBufferLen );
     sprintf( pcWriteBuffer, "MA7xx Current Position\r\nPosition : ");
@@ -45,8 +45,7 @@ static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 	//const char *pcParameter;
 	// xParameterStringLength;
 	BaseType_t xReturn;
-	uint16_t rxdata[2] = {0};
-	uint16_t txdata[2] = {0};
+	uint16_t rxdata = 0;
     char str[10] = {0};
 	uint16_t offset = 0;
     //static UBaseType_t uxParameterNumber = 0;
@@ -56,17 +55,8 @@ static BaseType_t prvReadOffset( char *pcWriteBuffer, size_t xWriteBufferLen, co
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
-	txdata[0] = CMD_R | Z_7_0;
-
-    HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
-
-	offset = rxdata[1] >> 8;
-	txdata[0] = CMD_R | Z_15_8;
-
-    HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
-
-	rxdata[1] &= 0xFF00;
-	offset |= rxdata[1];
+    offset = MA7xx_ReadRegister(Z_7_0 >>8);
+	offset |= (MA7xx_ReadRegister(Z_15_8 >>8)) << 8;
 
     xsprintf(str, "%d", offset);
 
@@ -187,9 +177,8 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
         if(pcParameter != NULL){
 
             offset = strtol(pcParameter, NULL , 10);
-            txdata[0] = CMD_R | (0xFF00 & (offset << 8));
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 2, 100);
-			data = (rxdata[1] & 0xFF00) >> 8;
+
+            data = MA7xx_ReadRegister(offset);
             xsprintf(str, "0x%02x", data);
 
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );

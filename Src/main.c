@@ -41,6 +41,7 @@
 #include "AMT23.h"
 #include "uart_util_hal.h"
 #include "HEDL5540.h"
+#include "MA7xx.h"
 
 #include "FreeRTOS_CLI.h"
 //#include "UART-interrupt-driven-command-console.h"
@@ -154,6 +155,7 @@ int main(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, RESET);
   setbuf(stdout, NULL );
+  Encoder_Init_MA7xx();
   //UART_Util_Init(&huart1);
   //uint8_t a = 'B';
   //HAL_UART_Transmit(&huart1, &a, 1, 100);

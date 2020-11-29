@@ -14,11 +14,14 @@
 
 #if !defined(HW_SOURCE) && !defined(HW_HEADER)
 
-#define ENC_HEADER  "MA730.h"
-#define ENC_SOURCE  "MA730.c"
+//#define ENC_HEADER  "MA730.h"
+//#define ENC_SOURCE  "MA730.c"
 
 //#define ENC_HEADER  "MA732.h"
-//#define ENC_SOURCE  "MA730.c"
+//#define ENC_SOURCE  "MA732.c"
+
+#define ENC_HEADER  "MA702.h"
+#define ENC_SOURCE  "MA702.c"
 
 //#define ENC_HEADER  "MA330.h"
 //#define ENC_SOURCE  "MA330.c"
@@ -32,9 +35,6 @@
 #ifndef ENC_HEADER
 #error "No encoder header file set"
 #endif
-
-#include "MA7xx.h"
-
 
 #ifdef __cplusplus
 }
