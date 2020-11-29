@@ -270,6 +270,34 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
     return xReturn;
 }
 
+static BaseType_t prvReadPPT( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	// xParameterStringLength;
+	BaseType_t xReturn;
+	uint16_t data = 0;
+	uint16_t txdata = 0;
+    char str[10] = {0};
+	char str2[20] = {0};
+	uint16_t pos = 0;
+    //static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+    pos = MA7xx_ReadPPT();
+
+    xsprintf(str, "%d", pos);
+
+    memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+    sprintf( pcWriteBuffer, "MA7xx ABZ Resolution\r\nResolution : ");
+    strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
+    strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+    xReturn = pdFALSE;
+	return xReturn;
+}
 
 static const CLI_Command_Definition_t xParameterMA7xx_ReadPos =
 {
@@ -311,6 +339,14 @@ static const CLI_Command_Definition_t xParameterMA7xx_WriteRegister =
     2 /* Two parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterMA7xx_ReadPPT =
+{
+    "ppt",
+    "\r\nppt:\r\n Read MA7xx ABZ pulse\r\n",
+    prvReadPPT, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterMA7xxCLICommands( void ){
 
     
@@ -319,5 +355,6 @@ void vRegisterMA7xxCLICommands( void ){
 	FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_WriteOffset );
 	FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_ReadRegister );
 	FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_WriteRegister );
+    FreeRTOS_CLIRegisterCommand( &xParameterMA7xx_ReadPPT );
 
 }

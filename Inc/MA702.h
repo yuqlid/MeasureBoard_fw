@@ -12,6 +12,9 @@
  extern "C" {
 #endif
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define ENCODER_NAME    "MA702"
 
 #define CMD_W   0x8000
@@ -35,6 +38,11 @@ typedef enum {
 } MA702_RegAddr;
 
 uint16_t MA702_GetAngle(void);
+bool MA702_ReadRotateDir(void);
+bool MA702_ReadETX(void);
+bool MA702_ReadETY(void);
+uint16_t MA702_ReadPPT(void);
+uint8_t MA702_ReadBCT(void);
 uint8_t MA702_ReadResiter(uint8_t Addr);
 uint8_t MA702_WriteResiter(uint8_t Addr, uint8_t data);
 
