@@ -13,6 +13,8 @@
 
 uint16_t (*MA7xx_GetAngle)(void);
 uint8_t (*MA7xx_ReadRegister)(uint8_t);
+uint8_t (*MA7xx_WriteRegister)(uint8_t, uint8_t);
+uint32_t (*delay)(uint32_t);
 /*
 uint16_t MA7xx_GetAngle(void){
 

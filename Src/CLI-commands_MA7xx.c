@@ -104,17 +104,8 @@ static BaseType_t prvWriteOffset( char *pcWriteBuffer, size_t xWriteBufferLen, c
 
             offset = strtol(pcParameter, NULL , 10);
 
-            txdata = CMD_W | Z_7_0 | (0x00FF & offset);
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
-            osDelay(20);
-            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
-            data = 0xFF & (rxdata >> 8);
-
-            txdata = CMD_W | Z_15_8 | (0x00FF & (offset >> 8));
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
-            osDelay(20);
-            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
-            data |= rxdata;
+            data = MA7xx_WriteRegister(Z_7_0 >> 8, 0x00FF & offset);
+            data |= MA7xx_WriteRegister(Z_15_8 >> 8,(0x00FF & (offset >> 8))) << 8;
 
             xsprintf(str, "%5d", offset);
             xsprintf(str2, "%5d", data);
@@ -215,7 +206,7 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
     static uint16_t txdata = 0;
     char str[10] = {0};
 	char str2[10] = {0};
-    long offset = 0;
+    static long Addr = 0;
 	long registerdata = 0;
 	uint16_t data = 0;
     static UBaseType_t uxParameterNumber = 0;
@@ -238,26 +229,20 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
         );
 
         if(uxParameterNumber == 1){
-            offset = strtol(pcParameter, NULL , 10);
-            txdata = CMD_W | (0xFF00 & (offset << 8));
-            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+            Addr = strtol(pcParameter, NULL , 10);
 
+            memset( pcWriteBuffer, 0x00, xWriteBufferLen );
             sprintf( pcWriteBuffer, "Register : ");
             strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
 
         }
         if(uxParameterNumber == 2){
             registerdata = strtol(pcParameter, NULL , 10);
-            txdata |= (0xFF & registerdata);
-            HAL_SPI_TransmitReceive(&hspi1, &txdata, &rxdata, 1, 100);
 
-            osDelay(20);
+            data = MA7xx_WriteRegister(0xFF & Addr, 0xFF & registerdata);
 
-            HAL_SPI_Receive(&hspi1, &rxdata, 1, 100);
-            data = 0xFF & (rxdata >> 8);
-            
-            xsprintf(str, "0x%02x", data);
-            xsprintf(str2, "0x%02x", txdata & 0xFF);
+            xsprintf(str,   "0x%02x", 0xFF & registerdata);
+            xsprintf(str2,  "0x%02x", 0xFF & data);
 
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );
             strncat( pcWriteBuffer, (const char *)(" New val : "), strlen( " New val : " ) );

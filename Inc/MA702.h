@@ -36,6 +36,7 @@ typedef enum {
 
 uint16_t MA702_GetAngle(void);
 uint8_t MA702_ReadResiter(uint8_t Addr);
+uint8_t MA702_WriteResiter(uint8_t Addr, uint8_t data);
 
 #ifdef __cplusplus
 }
