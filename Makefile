@@ -101,7 +101,9 @@ Src/scramble_tasks.c \
 FreeRTOS_helpers/port_DRN.c \
 FreeRTOS_helpers/heap_useNewlib_ST.c \
 xprintf/xprintf.c \
-src/bq34z100-G1.c
+src/bq34z100-G1.c \
+src/eeprom.c \
+src/eeprom_CLI-commands.c
 
 # ASM sources
 ASM_SOURCES =  \
