@@ -27,26 +27,39 @@ static BaseType_t prvWriteall( char *pcWriteBuffer, size_t xWriteBufferLen, cons
 	uint8_t	RxData = 0;
 	char datastr[10] = {0};
 	char addrstr[10] = {0};
-	uint8_t data[10] = {
+	#define  datasize 16
+	uint8_t data[datasize] = {
 		0x00,	// 書き込み開始アドレス上位バイト
 		0x00,	// 書き込み開始アドレス下位バイト
 		0x80,
-		0x02,
+		0x0E,
+		0x00,
+		0xCC,
+		0x88,
+		0x13,
+		0xf0,
 		0x00,
 		0x00,
 		0x00,
 		0x00,
+		0x80,
 		0x00,
-		0x00,
+		0x00
 	};
 	//80 02 00 00 00 00 00 00
 	//80 03 00 6E FF 00 FF 00 00 00
-	//80 0E 00 CC 88 13 f0 00 00 00 00 80 00 00 
+	//80 0E 00 CC 88 13 f0 00 00 00 00 80 00 00
+	//80 0E 00 CC 88 13 ff 00 00 00 00 80 00 00
+	//80 0E 00 CC 88 13 FF 00 00 00 00 80 00 00
+	//80 0E 00 CC 88 13 FF 00 00 00 00 80 00 00
+	//80 0E 00 CC 88 13 f0 00 00 00 00 80 00 00
+	//80 03 00 6E FF 00 FF 00 00 00
+	//80 03 00 00 00 00 00 00 00 00
 
 	memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-	HAL_I2C_Master_Transmit(&hi2c1, EEPROM_24FC512_I2C_ADDR << 1, data, 10, 1000);
+	HAL_I2C_Master_Transmit(&hi2c1, EEPROM_24FC512_I2C_ADDR << 1, data, datasize, 1000);
 
-	for (uint8_t i = 0; i < 8; i++){
+	for (uint8_t i = 0; i < datasize - 2; i++){
 		//EEPROM_Write(i, &(data[i+2]), 1);
 		xsprintf(addrstr, "0x%03X", i);
 		xsprintf(datastr, "0x%02X", data[i+2]);
@@ -152,8 +165,8 @@ static BaseType_t prvPDIControlSPI( char *pcWriteBuffer, size_t xWriteBufferLen,
 	char configstr[10] = {0};
 	uint8_t data[3] = {
 		0x0,
-		0x7,
-		0x0
+		0x6,
+		0xff
 	};
 	
 	//EEPROM_Write(7, &RxData, 1);
