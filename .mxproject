@@ -7,9 +7,9 @@ HeaderPath=Drivers\STM32F3xx_HAL_Driver\Inc;Drivers\STM32F3xx_HAL_Driver\Inc\Leg
 CDefines=USE_HAL_DRIVER;STM32F303xC;USE_HAL_DRIVER;USE_HAL_DRIVER;
 
 [PreviousGenFiles]
-HeaderPath=D:/yuki/workspace_stm32/MeasureBoard_fw/Inc
+HeaderPath=F:/ws_stm32/MeasureBoard_fw/Inc
 HeaderFiles=gpio.h;FreeRTOSConfig.h;can.h;dma.h;i2c.h;spi.h;tim.h;usart.h;usb_device.h;usbd_conf.h;usbd_desc.h;usbd_cdc_if.h;stm32f3xx_it.h;stm32f3xx_hal_conf.h;main.h;
-SourcePath=D:/yuki/workspace_stm32/MeasureBoard_fw/Src
+SourcePath=F:/ws_stm32/MeasureBoard_fw/Src
 SourceFiles=gpio.c;freertos.c;can.c;dma.c;i2c.c;spi.c;tim.c;usart.c;usb_device.c;usbd_conf.c;usbd_desc.c;usbd_cdc_if.c;stm32f3xx_it.c;stm32f3xx_hal_msp.c;stm32f3xx_hal_timebase_tim.c;main.c;
 
 [ThirdPartyIp]
