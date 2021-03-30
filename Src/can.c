@@ -30,6 +30,13 @@ CAN_HandleTypeDef hcan;
 void MX_CAN_Init(void)
 {
 
+  /* USER CODE BEGIN CAN_Init 0 */
+
+  /* USER CODE END CAN_Init 0 */
+
+  /* USER CODE BEGIN CAN_Init 1 */
+
+  /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN;
   hcan.Init.Prescaler = 9;
   hcan.Init.Mode = CAN_MODE_NORMAL;
@@ -46,6 +53,9 @@ void MX_CAN_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN CAN_Init 2 */
+
+  /* USER CODE END CAN_Init 2 */
 
 }
 

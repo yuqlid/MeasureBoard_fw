@@ -31,9 +31,17 @@ TIM_HandleTypeDef htim17;
 /* TIM2 init function */
 void MX_TIM2_Init(void)
 {
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
   TIM_Encoder_InitTypeDef sConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -59,12 +67,22 @@ void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 /* TIM16 init function */
 void MX_TIM16_Init(void)
 {
 
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = TIM16_Prescaler;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -76,12 +94,22 @@ void MX_TIM16_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
 
 }
 /* TIM17 init function */
 void MX_TIM17_Init(void)
 {
 
+  /* USER CODE BEGIN TIM17_Init 0 */
+
+  /* USER CODE END TIM17_Init 0 */
+
+  /* USER CODE BEGIN TIM17_Init 1 */
+
+  /* USER CODE END TIM17_Init 1 */
   htim17.Instance = TIM17;
   htim17.Init.Prescaler = TIM17_PSC;
   htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -93,6 +121,9 @@ void MX_TIM17_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM17_Init 2 */
+
+  /* USER CODE END TIM17_Init 2 */
 
 }
 
