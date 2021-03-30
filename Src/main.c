@@ -168,7 +168,7 @@ int main(void)
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
-  //vRegisterScrambleCLICommands();
+  vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
   //vRegisterMA7xxCLICommands();
   //HEDL5540_Encoder_Init(&htim2);
@@ -176,6 +176,7 @@ int main(void)
   scramble_RegisterTasks();
   
   osThreadSuspend(rs485TransmitTaskHandle);
+  osThreadSuspend(rs485DribbleTaskHandle);
   osThreadSuspend(COMSendTaskHandle);
   osThreadSuspend(EncoderProcessTaskHandle);
 

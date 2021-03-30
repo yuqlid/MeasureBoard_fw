@@ -21,11 +21,13 @@
 #include "cmsis_os.h"
 #include "FreeRTOS_CLI.h"
 
+extern osThreadId rs485DribbleTaskHandle;
 extern osThreadId rs485TransmitTaskHandle;
 extern osThreadId COMSendTaskHandle;
 extern osThreadId EncoderProcessTaskHandle;
 
 void setTargetSpeed(long *speed_rpm);
+void setDribbleDuty(long *setduty);
 void scramble_RegisterTasks(void);
 
 #ifdef __cplusplus

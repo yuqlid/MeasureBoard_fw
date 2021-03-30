@@ -20,10 +20,15 @@ extern osSemaphoreId RS485transmitSemaphoreHandle;
 
 static int32_t speed_rpm_fil = 0;
 int32_t target_speed_rpm = 0;
+int32_t duty = 0;
 
 osThreadId rs485TransmitTaskHandle;
 static uint32_t rs485TransmitTaskBuffer[ 256 ];
 static osStaticThreadDef_t rs485TransmitTaskControlBlock;
+
+osThreadId rs485DribbleTaskHandle;
+static uint32_t rs485DribbleTaskBuffer[ 256 ];
+static osStaticThreadDef_t rs485DribbleTaskControlBlock;
 
 osThreadId COMSendTaskHandle;
 static uint32_t COMSendTaskBuffer[ 256 ];
@@ -37,6 +42,10 @@ void com_printf(const char* format, ...);
 
 void setTargetSpeed(long *speed_rpm){
     target_speed_rpm = *speed_rpm;
+}
+
+void setDribbleDuty(long *setduty){
+    duty = *setduty;
 }
 
 void EncoderProcessTask(void const * argument){
@@ -86,6 +95,32 @@ void rs485TransmitTask(void const * argument){
     }
 }
 
+// ドリブル用モータへ定周期通信
+void rs485DribbleTask(void const * argument){
+
+    uint8_t txbuf[4] = {0xAA, 0xCC, 0x00, 0x00};
+
+    for(;;)
+    {
+        txbuf[2] = 0;
+        txbuf[3] = 0;
+        if(duty > 4095){
+            duty = 4095;
+        }else if(duty < -4095){
+            duty = -4095;
+        }
+        txbuf[2] = duty & 0xFF;
+        txbuf[3] = (duty & 0xFF00) >> 8;
+        if(duty > 0){
+            txbuf[3] |= 0x80;
+        }
+
+        RS485_Transmit(0x01, 0x00, txbuf, 4);
+        LED_Toggle(LED2);
+        osDelay(10);
+    }
+}
+
 void COMSendTask(void const * argument){
 
     for(;;)
@@ -110,8 +145,11 @@ void scramble_RegisterTasks(void){
     osThreadStaticDef(encoderprocessTask, EncoderProcessTask, osPriorityNormal, 0, 256, EncoderProcessTaskBuffer, &EncoderProcessTaskControlBlock);
     EncoderProcessTaskHandle = osThreadCreate(osThread(encoderprocessTask), NULL);
 
-    osThreadStaticDef(rs485Task, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
-    rs485TransmitTaskHandle = osThreadCreate(osThread(rs485Task), NULL);
+    osThreadStaticDef(rs485dribbleTask, rs485DribbleTask, osPriorityNormal, 0, 256, rs485DribbleTaskBuffer, &rs485DribbleTaskControlBlock);
+    rs485DribbleTaskHandle = osThreadCreate(osThread(rs485dribbleTask), NULL);
+
+    osThreadStaticDef(rs485transmitTask, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
+    rs485TransmitTaskHandle = osThreadCreate(osThread(rs485transmitTask), NULL);
 
     osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
     COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
