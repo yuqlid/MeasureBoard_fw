@@ -134,6 +134,70 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 	return xReturn;
 }
 
+static BaseType_t prvSetNerIDCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	const char *pcParameter;
+	BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	static UBaseType_t uxParameterNumber = 0;
+	long newid = 0;
+	uint8_t id = 0x10;
+
+	/* Remove compile time warnings about unused parameters, and check the
+	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	write buffer length is adequate, so does not check for buffer overflows. */
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+    
+	if(uxParameterNumber == 0){
+		sprintf( pcWriteBuffer, "New ID : " );
+		uxParameterNumber = 1;
+		xReturn = pdPASS;
+	}else{
+		/* Obtain the parameter string. */
+		pcParameter = FreeRTOS_CLIGetParameter(
+							pcCommandString,		/* The command string itself. */
+							uxParameterNumber,		/* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+		);
+
+		if(pcParameter != NULL){
+			/* Return the parameter string. */
+			
+			newid = strtol(pcParameter, NULL , 10);
+			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+
+			if(newid >= 0 && newid <= 3){
+				strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
+				strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+				id += newid;
+				// 今はハードコーディングなのでIDも変更できるようにしたい
+				RS485_Transmit(0x10, 0x30, &id, 1);
+			}else{
+				strncat( pcWriteBuffer, (const char *)("Invalid\r\n"), strlen("Invalid\r\n") );
+			}
+
+			/* There might be more parameters to return after this one. */
+			xReturn = pdTRUE;
+			uxParameterNumber++;
+
+		}else{
+			/* No more parameters were found.  Make sure the write buffer does
+			not contain a valid string. */
+			pcWriteBuffer[ 0 ] = 0x00;
+
+			/* No more data to return. */
+			xReturn = pdFALSE;
+
+			/* Start over the next time this command is executed. */
+			uxParameterNumber = 0;
+		}
+	}
+
+	return xReturn;
+}
+
 static BaseType_t prvSetDribbleDutyCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	const char *pcParameter;
@@ -274,7 +338,15 @@ static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 	"speed",
 	"\r\nspeed:\r\n Set Target Speed [rpn]\r\n",
 	prvSetTargetSpeedCommand, /* The function to run. */
-	1 /* No parameters are expected. */
+	1 /* One parameter is expected. */
+};
+
+static const CLI_Command_Definition_t xParameterSetNewID =
+{
+	"id",
+	"\r\nid:\r\n Set New ID (0~3)\r\n",
+	prvSetNerIDCommand, /* The function to run. */
+	1 /* One parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xParameterSetDribbleDuty =
@@ -282,7 +354,7 @@ static const CLI_Command_Definition_t xParameterSetDribbleDuty =
 	"duty",
 	"\r\nduty:\r\n Set Dribble Duty\r\n",
 	prvSetDribbleDutyCommand, /* The function to run. */
-	1 /* No parameters are expected. */
+	1 /* One parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xParameterEncoderCalibrate =
@@ -305,10 +377,13 @@ static const CLI_Command_Definition_t xParameterCanTest =
 void vRegisterScrambleCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
-	//FreeRTOS_CLIRegisterCommand( &xParameterRS485Periodic );
-	//FreeRTOS_CLIRegisterCommand( &xParameterSetTargetSPeed );
-	//FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
+	FreeRTOS_CLIRegisterCommand( &xParameterRS485Periodic );
+	FreeRTOS_CLIRegisterCommand( &xParameterSetTargetSPeed );
+	FreeRTOS_CLIRegisterCommand( &xParameterEncoderCalibrate );
+	FreeRTOS_CLIRegisterCommand( &xParameterSetNewID );
+
 	//FreeRTOS_CLIRegisterCommand( &xParameterCanTest );
-	FreeRTOS_CLIRegisterCommand( &xParameterRS485Dribble );
-	FreeRTOS_CLIRegisterCommand( &xParameterSetDribbleDuty );
+
+	//FreeRTOS_CLIRegisterCommand( &xParameterRS485Dribble );
+	//FreeRTOS_CLIRegisterCommand( &xParameterSetDribbleDuty );
 }
