@@ -136,12 +136,16 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 
 static BaseType_t prvSetNerIDCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
+	const char *const pcHeader = "Invalid Input\r\n";
+	const char *const pcFooder = "\r\nNew ID is enabled after Reset.\r\n";
 	const char *pcParameter;
 	BaseType_t xParameterStringLength;
 	BaseType_t xReturn;
 	static UBaseType_t uxParameterNumber = 0;
-	long newid = 0;
-	uint8_t id = 0x10;
+	long send_id = 0;
+	static long id = 0x10;
+	static bool inputerr = false;
+	uint8_t new_id;
 
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
@@ -151,7 +155,7 @@ static BaseType_t prvSetNerIDCommand( char *pcWriteBuffer, size_t xWriteBufferLe
 	configASSERT( pcWriteBuffer );
     
 	if(uxParameterNumber == 0){
-		sprintf( pcWriteBuffer, "New ID : " );
+		sprintf( pcWriteBuffer, "Override ID : " );
 		uxParameterNumber = 1;
 		xReturn = pdPASS;
 	}else{
@@ -162,39 +166,41 @@ static BaseType_t prvSetNerIDCommand( char *pcWriteBuffer, size_t xWriteBufferLe
 							&xParameterStringLength	/* Store the parameter string length. */
 		);
 
-		if(pcParameter != NULL){
-			/* Return the parameter string. */
-			
-			newid = strtol(pcParameter, NULL , 10);
+		if(uxParameterNumber == 1){
+			send_id = strtol(pcParameter, NULL , 10);
 			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-
-			if(newid >= 0 && newid <= 3){
+			if(send_id >= 0 && send_id <= 3){
 				strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-				strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-				id += newid;
-				// 今はハードコーディングなのでIDも変更できるようにしたい
-				RS485_Transmit(0x10, 0x30, &id, 1);
+				strncat( pcWriteBuffer, (const char *)(" to "), strlen( " to " ) );
+				id += send_id;
 			}else{
-				strncat( pcWriteBuffer, (const char *)("Invalid\r\n"), strlen("Invalid\r\n") );
+				strncat( pcWriteBuffer, pcHeader, strlen(pcHeader) );
+				return pdFALSE;
 			}
+		}
+		if(uxParameterNumber == 2){
 
-			/* There might be more parameters to return after this one. */
-			xReturn = pdTRUE;
-			uxParameterNumber++;
+			new_id = strtol(pcParameter, NULL , 10);
+			if(new_id >= 0 && new_id <= 3){
+				memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+				strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
+				strncat( pcWriteBuffer, ( char * ) pcFooder, ( size_t ) pcFooder );
+				new_id += 0x10;
+				RS485_Transmit(id, 0x40, &new_id, 1);
+				
+			}else{
+				memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+				strncat( pcWriteBuffer, pcHeader, strlen(pcHeader) );
+			}
+			xReturn = pdFALSE;
+			id = 0x10;
+			uxParameterNumber = 0;
 
 		}else{
-			/* No more parameters were found.  Make sure the write buffer does
-			not contain a valid string. */
-			pcWriteBuffer[ 0 ] = 0x00;
-
-			/* No more data to return. */
-			xReturn = pdFALSE;
-
-			/* Start over the next time this command is executed. */
-			uxParameterNumber = 0;
+				xReturn = pdTRUE;
+				uxParameterNumber++;
 		}
 	}
-
 	return xReturn;
 }
 
@@ -344,9 +350,9 @@ static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 static const CLI_Command_Definition_t xParameterSetNewID =
 {
 	"id",
-	"\r\nid:\r\n Set New ID (0~3)\r\n",
+	"\r\nid:\r\n Set New ID targetID(0~3) NewID(0~3)\r\n",
 	prvSetNerIDCommand, /* The function to run. */
-	1 /* One parameter is expected. */
+	2 /* One parameter is expected. */
 };
 
 static const CLI_Command_Definition_t xParameterSetDribbleDuty =
