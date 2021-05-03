@@ -91,7 +91,7 @@ static BaseType_t prvSetTargetSpeedCommand( char *pcWriteBuffer, size_t xWriteBu
 	configASSERT( pcWriteBuffer );
     
 	if(uxParameterNumber == 0){
-		sprintf( pcWriteBuffer, "New Target Speed :" );
+		sprintf( pcWriteBuffer, "New Target Velocity :" );
 		uxParameterNumber = 1;
 		xReturn = pdPASS;
 	}else{
@@ -325,8 +325,8 @@ static BaseType_t prvCanTest( char *pcWriteBuffer, size_t xWriteBufferLen, const
 
 static const CLI_Command_Definition_t xParameterRS485Periodic =
 {
-	"com_periodic",
-	"\r\ncom_periodic:\r\n Switch RS485 transmit command Periodic of Not\r\n",
+	"csv",
+	"\r\ncsv:\r\n Toggle RS485 Cyclic synchronous velocity mode\r\n",
 	prvPS485PeriodicCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -341,8 +341,8 @@ static const CLI_Command_Definition_t xParameterRS485Dribble =
 
 static const CLI_Command_Definition_t xParameterSetTargetSPeed =
 {
-	"speed",
-	"\r\nspeed:\r\n Set Target Speed [rpn]\r\n",
+	"v",
+	"\r\nv:\r\n Set Target velocity [rpn]\r\n",
 	prvSetTargetSpeedCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
