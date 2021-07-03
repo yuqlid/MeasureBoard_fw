@@ -107,7 +107,9 @@ src/CLI-commands_MA7xx.c \
 src/MA7xx.c \
 src/HEDL5540.c \
 src/eeprom.c \
-src/eeprom_CLI-commands.c
+src/eeprom_CLI-commands.c \
+sec/bq769x0.c \
+src/CLI-commands_bq769x0.c
 
 # ASM sources
 ASM_SOURCES =  \

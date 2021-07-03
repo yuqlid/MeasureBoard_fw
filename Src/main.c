@@ -38,6 +38,7 @@
 #include "CLI-commands_MA7xx.h"
 #include "scramble_tasks.h"
 #include "eeprom_CLI-commands.h"
+#include "CLI-commands_bq769x0.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
@@ -173,6 +174,7 @@ int main(void)
   //vRegisterMA7xxCLICommands();
   //HEDL5540_Encoder_Init(&htim2);
   //vRegisterEEPROMCLICommands();
+  vRegisterbq769x0CLICommands();
   scramble_RegisterTasks();
   
   osThreadSuspend(rs485TransmitTaskHandle);
