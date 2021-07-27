@@ -14,8 +14,8 @@
  extern "C" {
 #endif
 
-//#define BQ769X0_I2C_ADDR    0x08
-#define BQ769X0_I2C_ADDR    0x18
+#define BQ769X0_I2C_ADDR    0x08
+//#define BQ769X0_I2C_ADDR    0x18
 
 typedef enum {
     SYS_STAT    = 0x00,

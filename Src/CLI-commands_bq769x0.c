@@ -256,7 +256,7 @@ static const CLI_Command_Definition_t xParameterReadSYSCTRL2 =
 static const CLI_Command_Definition_t xParameterCHG =
 {
 	"chg",
-	"\r\nrchg:\r\n Toggle CHG_ON bit\r\n",
+	"\r\nWchg:\r\n Toggle CHG_ON bit\r\n",
 	prvchg, /* The function to run. */
 	0 /* No parameters are expected. */
 };
