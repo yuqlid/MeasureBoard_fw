@@ -7,6 +7,7 @@
 
 #include "CLI-commands_bq769x0.h"
 #include "xprintf.h"
+#include "i2c.h"
 
 static bool chg_state = false;
 static bool dsg_state = false;
@@ -245,6 +246,38 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
     return xReturn;
 }
 
+static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+    uint16_t  DevAddress = 0x16;
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	uint8_t		RxData = 0xFF;
+	char configstr[10] = {0};
+    uint8_t buffertx = 0x0E;
+
+
+    HAL_SMBUS_Master_Transmit_IT(&hsmbus1, DevAddress, &buffertx, 1, SMBUS_FIRST_AND_LAST_FRAME_NO_PEC);
+    while(HAL_SMBUS_GetState(&hsmbus1) != HAL_SMBUS_STATE_READY);
+    HAL_SMBUS_Master_Receive_IT(&hsmbus1, DevAddress, &buffertx, 1,  SMBUS_FIRST_AND_LAST_FRAME_NO_PEC);
+    while(HAL_SMBUS_GetState(&hsmbus1) != HAL_SMBUS_STATE_READY);
+    RxData = BQ769X0_READ_SYS_CTRL2();
+
+	xsprintf(configstr, "0x%X", RxData);
+	sprintf( pcWriteBuffer, "SYS_CTRL2 : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static const CLI_Command_Definition_t xParameterReadSYSCTRL2 =
 {
 	"read",
@@ -285,6 +318,14 @@ static const CLI_Command_Definition_t xParameterbq769x0_WriteRegister =
     2 /* Two parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParametervolt =
+{
+	"volt",
+	"\r\nvolt:\r\n Read Battery Voltage\r\n",
+	prvvolt, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterbq769x0CLICommands( void ){
 
     FreeRTOS_CLIRegisterCommand( &xParameterReadSYSCTRL2 );
@@ -292,4 +333,6 @@ void vRegisterbq769x0CLICommands( void ){
 	FreeRTOS_CLIRegisterCommand( &xParameterDSG );
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_WriteRegister );
+    FreeRTOS_CLIRegisterCommand( &xParametervolt );
+
 }
