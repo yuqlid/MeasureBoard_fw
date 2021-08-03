@@ -39,6 +39,7 @@
 #include "scramble_tasks.h"
 #include "eeprom_CLI-commands.h"
 #include "CLI-commands_bq769x0.h"
+#include "CLI-commands_bq78350.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
@@ -169,12 +170,13 @@ int main(void)
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
-  vRegisterScrambleCLICommands();
+  //vRegisterScrambleCLICommands();
   //vRegisterbq34z100G1CLICommands();
   //vRegisterMA7xxCLICommands();
   //HEDL5540_Encoder_Init(&htim2);
   //vRegisterEEPROMCLICommands();
-  vRegisterbq769x0CLICommands();
+  //vRegisterbq769x0CLICommands();
+  vRegisterbq78350CLICommands();
   scramble_RegisterTasks();
   
   osThreadSuspend(rs485TransmitTaskHandle);

@@ -105,7 +105,9 @@ src/CLI-commands_MA7xx.c \
 src/MA7xx.c \
 src/HEDL5540.c \
 sec/bq769x0.c \
-src/CLI-commands_bq769x0.c 
+sec/bq78350.c \
+src/CLI-commands_bq769x0.c \
+src/CLI-commands_bq78350.c 
 
 # ASM sources
 ASM_SOURCES =  \
