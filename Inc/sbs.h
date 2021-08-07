@@ -44,7 +44,7 @@
 #define DEVICE_NAME
 #define DEVICE_CHEMISTRY
 #define MANUFACTURER_DATA
-#define HOST_FET_CONTROL
+#define HOST_FET_CONTROL                    0x2B
 #define GPIO_STATUS
 #define GPIO_CONTROL
 #define VAUXVOLTAGE
@@ -98,6 +98,9 @@
 
 
 //Manufacturer Access Commands
+#define CHG_FET                             0x001F
+#define DSG_FET                             0x0020
+#define LEDDISPLAYENABLE                    0x0027
 #define DEVICE_RESET						0x0041
 #define OPERATION_STATUS					0x0054
 #define SECURITY_KEYS                       0x0035

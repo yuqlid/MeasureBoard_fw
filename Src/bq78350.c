@@ -15,6 +15,6 @@ void BQ78350_Read(uint8_t addr, uint8_t *pData, uint16_t len){
 
 void BQ78350_Write(uint8_t addr, uint8_t *pData, uint16_t len){
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2 * len, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2 * len, 1000);
 }
 

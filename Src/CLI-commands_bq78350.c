@@ -177,6 +177,34 @@ static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
 	return xReturn;
 }
 
+static BaseType_t prvfet( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	
+	uint8_t		RxData = 0xFF;
+	uint16_t	TxData = 0x1197;
+	char configstr[10] = {0};
+
+    BQ78350_Write(HOST_FET_CONTROL, &TxData, 1);
+    osDelay(1);
+    TxData = 0x03;
+    BQ78350_Write(HOST_FET_CONTROL, &TxData, 1);
+
+    sprintf( pcWriteBuffer, "HostFETControl");
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	//const char *pcParameter;
@@ -192,6 +220,39 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
 	char configstr[10] = {0};
     //ManufacturerBlockAccess()で0x44ACの値を読み出し
     const uint8_t txdata[3] = {0x02, 0xAC, 0x44};
+    const uint8_t rxdata[5] = {0};
+
+    HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
+    const uint16_t addr = *(uint16_t *)(&rxdata[1]);
+    const uint16_t data = rxdata[3] << 8 | rxdata[4];
+	sprintf( pcWriteBuffer, "Data Flash : " );
+    xsprintf(configstr, "0x%04X ", addr);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, ( char * ) "Read  : ", strlen( "Read  : " ) );
+    xsprintf(configstr, "0x%04X", data);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+    
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvReadFETOptions( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+    uint16_t  DevAddress = 0x16;
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	char configstr[10] = {0};
+    //ManufacturerBlockAccess()で0x44ACの値を読み出し
+    const uint8_t txdata[3] = {0x02, 0x5F, 0x44};
     const uint8_t rxdata[5] = {0};
 
     HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
@@ -229,6 +290,78 @@ static BaseType_t prvWriteAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLe
     HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
     
 	sprintf( pcWriteBuffer, "Data Flash : 0x44AC Write : 0x0273");
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvLEDDisplayEnable( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+    uint16_t  DevAddress = 0x16;
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	char configstr[40] = {0};
+
+    uint16_t txdata = LEDDISPLAYENABLE;
+    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+
+	sprintf( pcWriteBuffer, "LEDDisplayEnable()");
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvCHG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+    uint16_t  DevAddress = 0x16;
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	char configstr[40] = {0};
+
+    uint16_t txdata = CHG_FET;
+    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+
+	sprintf( pcWriteBuffer, "CHG_FET()");
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvDSG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+    uint16_t  DevAddress = 0x16;
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	char configstr[40] = {0};
+
+    uint16_t txdata = DSG_FET;
+    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+
+	sprintf( pcWriteBuffer, "DSG_FET()");
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
@@ -276,6 +409,46 @@ static const CLI_Command_Definition_t xParameterWAFECellMap =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterfet =
+{
+	"fet",
+	"\r\nfet:\r\n HostFETControl\r\n",
+	prvfet, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterReadFETOptions =
+{
+	"fetop",
+	"\r\nfetop:\r\n ManufacturerBlockAccess Read FET Options (0x445F)\r\n",
+	prvReadFETOptions, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterLEDDisplayEnable =
+{
+	"led",
+	"\r\nled:\r\n ManufacturerAccess() LEDDisplayEnable() (0x0027)\r\n",
+	prvLEDDisplayEnable, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterCHG_FET =
+{
+	"chg",
+	"\r\nchg:\r\n ManufacturerAccess() CHG_FET() (0x001F)\r\n",
+	prvCHG_TET, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterDSG_FET =
+{
+	"dsg",
+	"\r\ndsg:\r\n ManufacturerAccess() DSG_FET() (0x0020)\r\n",
+	prvDSG_TET, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterbq78350CLICommands( void ){
 
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
@@ -283,5 +456,10 @@ void vRegisterbq78350CLICommands( void ){
     FreeRTOS_CLIRegisterCommand( &xParametervolt );
     FreeRTOS_CLIRegisterCommand( &xParameterRAFECellMap );
     FreeRTOS_CLIRegisterCommand( &xParameterWAFECellMap );
+    FreeRTOS_CLIRegisterCommand( &xParameterfet );
+    FreeRTOS_CLIRegisterCommand( &xParameterReadFETOptions );
+    FreeRTOS_CLIRegisterCommand( &xParameterLEDDisplayEnable );
+    FreeRTOS_CLIRegisterCommand( &xParameterCHG_FET );
+    FreeRTOS_CLIRegisterCommand( &xParameterDSG_FET );
 
 }
