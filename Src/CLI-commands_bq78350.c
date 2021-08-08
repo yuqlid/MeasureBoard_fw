@@ -198,11 +198,11 @@ static BaseType_t prvDAStatus2( char *pcWriteBuffer, size_t xWriteBufferLen, con
     TS1_temp -= K2degC;
     TS2_temp -= K2degC;
 
-    xsprintf(configstr, "%4d.%d", TS1_temp/10, TS1_temp%10);
+    xsprintf(configstr, "%3d.%d", TS1_temp/10, TS1_temp%10);
 	sprintf( pcWriteBuffer, "DAStatus2\r\nTS1_Temperature : " );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\nTS2_Temperature : "), strlen( "\r\nTS2_Temperature : " ) );
-    xsprintf(configstr, "%4d.%d", TS2_temp/10, TS2_temp%10);
+    xsprintf(configstr, "%3d.%d", TS2_temp/10, TS2_temp%10);
     strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
@@ -346,51 +346,46 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
 	configASSERT( pcWriteBuffer );
 
 	char configstr[10] = {0};
-    
-    uint16_t temperature = 0;;
-    int16_t temperature_deg = 0;
-    
+
+    int16_t temperature = 0;;
+    uint8_t dastatus2[17] = {0};
+
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, TEMPERATURE, I2C_MEMADD_SIZE_8BIT, &temperature, 2, 1000);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_2, I2C_MEMADD_SIZE_8BIT, dastatus2, 17, 1000);
 
-    temperature_deg = temperature - 2731;
+    // Temperature  Unit : 0.1 K[degC]
+    int16_t TS1_temp = *(int16_t *)(&dastatus2[5]);
+    int16_t TS2_temp = *(int16_t *)(&dastatus2[7]);
+    //int16_t TS3_temp = *(int16_t *)(&dastatus2[9]);
+    int16_t Cell_temp = *(int16_t *)(&dastatus2[11]);
+    //int16_t FET_temp = *(int16_t *)(&dastatus2[13]);
+    int16_t Int_Gauge_temp = *(int16_t *)(&dastatus2[15]);
+
+    // Convert Kelvin to degree Celsius
+    const int16_t K2degC = 2731;    // Unit : 0.1 K[degC]
+    temperature -= K2degC;
+    TS1_temp -= K2degC;
+    TS2_temp -= K2degC;
+    Cell_temp -= K2degC;
+    Int_Gauge_temp -= K2degC;
+    
     xsprintf(configstr, "%4d.%d", temperature/10, temperature%10);
-	sprintf( pcWriteBuffer, "Temperature\r\nPack : " );
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-	strncat( pcWriteBuffer, (const char *)(" K ( "), strlen(" K ( " ) );
-    xsprintf(configstr, "%3d.%d", temperature_deg/10, temperature_deg%10);
+	sprintf( pcWriteBuffer, "Temperature Unit : degree Celsius\r\nSBS Cmd (0x08) : " );
+    xsprintf(configstr, "%3d.%d", temperature/10, temperature%10);
     strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, (const char *)(" degC )\r\n"), strlen(" degC )\r\n" ) );
-
-    uint8_t txdata[3] = {0x02, 0x00, 0x42};
-    uint8_t rxdata[5] = {0};
-
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
-    uint16_t addr = *(uint16_t *)(&rxdata[1]);
-    int16_t data = rxdata[3] << 8 | rxdata[4];
-	strncat( pcWriteBuffer, ( char * ) "Data Flash : ", strlen( "Data Flash : " ) );
-    xsprintf(configstr, "0x%04X ", addr);
+    strncat( pcWriteBuffer, (const char *)("\r\nTS1            : "), strlen("\r\nTS1            : " ) );
+    xsprintf(configstr, "%3d.%d", TS1_temp/10, TS1_temp%10);
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Read : ", strlen( "Read : " ) );
-    xsprintf(configstr, "0x%04X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-
-    txdata[1] = 0x02;
-
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
-    addr = *(uint16_t *)(&rxdata[1]);
-    data = rxdata[3] << 8 | rxdata[4];
-	//sprintf( pcWriteBuffer, "Data Flash : " );
-    strncat( pcWriteBuffer, ( char * ) "Data Flash : ", strlen( "Data Flash : " ) );
-    xsprintf(configstr, "0x%04X ", addr);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Read : ", strlen( "Read : " ) );
-    xsprintf(configstr, "0x%04X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
-
+	strncat( pcWriteBuffer, (const char *)("\r\nTS2            : "), strlen("\r\nTS2            : " ) );
+    xsprintf(configstr, "%3d.%d", TS2_temp/10, TS2_temp%10);
+    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *)("\r\nCell           : "), strlen("\r\nCell           : " ) );
+    xsprintf(configstr, "%3d.%d", Cell_temp/10, Cell_temp%10);
+    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *)("\r\nInternal_Gauge : "), strlen("\r\nInternal_Gauge : " ) );
+    xsprintf(configstr, "%3d.%d", Int_Gauge_temp/10, Int_Gauge_temp%10);
+    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( " degC\r\n" ) );
     
     
 	xReturn = pdFALSE;
@@ -652,7 +647,7 @@ static const CLI_Command_Definition_t xParameterStatus =
 static const CLI_Command_Definition_t xParameterTemperature =
 {
 	"temp",
-	"\r\ntemp:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	"\r\ntemp:\r\n 0x08 Temperature\r\n",
 	prvReadTemperature, /* The function to run. */
 	0 /* No parameters are expected. */
 };
