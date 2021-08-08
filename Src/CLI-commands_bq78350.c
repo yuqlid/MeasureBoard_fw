@@ -144,7 +144,7 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
     return xReturn;
 }
 
-static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+static BaseType_t prvVoltage( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	//const char *pcParameter;
 	//BaseType_t xParameterStringLength;
@@ -163,22 +163,20 @@ static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
     uint16_t cellvoltage[15] = {0};
 
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1000);
-    
 	sprintf( pcWriteBuffer, "Battery Voltage Unit : V\r\n" );
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     for(int8_t i = 0; i < Cell_Serial ; i++){
-        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_1 - i, I2C_MEMADD_SIZE_8BIT, &cellvoltage[i], 2, 1000);
+        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_1 - i, I2C_MEMADD_SIZE_8BIT, cellvoltage + i, 2, 1000);
         xsprintf(configstr, "Cell %2d : ", i + 1);
-        strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+        strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
         xsprintf(configstr, "%2d.%03d", cellvoltage[i]/1000, cellvoltage[i]%1000);
-        strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+        strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
         strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     }
-    strncat( pcWriteBuffer, ( char * )  "Pack    : ", strlen( "Pack    : " ) );
+    strncat( pcWriteBuffer, (const char *)  "Pack    : ", strlen( "Pack    : " ) );
     xsprintf(configstr, "%2d.%03d", packVoltage/1000, packVoltage%1000);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -585,7 +583,7 @@ static const CLI_Command_Definition_t xParametervolt =
 {
 	"volt",
 	"\r\nvolt:\r\n 0x09 Voltage\r\n 0x31 CellVoltage15\r\n   |       |      \r\n 0x3F CellVoltage1\r\n",
-	prvvolt, /* The function to run. */
+	prvVoltage, /* The function to run. */
 	0 /* No parameters are expected. */
 };
 
