@@ -44,9 +44,9 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
 
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );
             sprintf( pcWriteBuffer, "Register : ");
-			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
+			strncat( pcWriteBuffer, (const char *) pcParameter, ( size_t ) xParameterStringLength );
 			strncat( pcWriteBuffer, (const char *)(" val : "), strlen( " val : " ) );
-            strncat( pcWriteBuffer, ( char * ) str, strlen( str ) );
+            strncat( pcWriteBuffer, (const char *) str, strlen( str ) );
             strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
             /* There might be more parameters to return after this one. */
@@ -103,7 +103,7 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );
 
             sprintf( pcWriteBuffer, "Register : ");
-            strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
+            strncat( pcWriteBuffer, (const char *) pcParameter, ( size_t ) xParameterStringLength );
 
         }
         if(uxParameterNumber == 2){
@@ -120,9 +120,9 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
 
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );
             strncat( pcWriteBuffer, (const char *)(" New val : "), strlen( " New val : " ) );
-            strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+            strncat( pcWriteBuffer, (const char *) str2, strlen( str2 ) );
             strncat( pcWriteBuffer, (const char *)(" Verify val : "), strlen( " Verify val : " ) );
-            strncat( pcWriteBuffer, ( char * ) str2, strlen( str2 ) );
+            strncat( pcWriteBuffer, (const char *) str2, strlen( str2 ) );
             strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
         }
         if(uxParameterNumber == 3){
@@ -201,7 +201,7 @@ static BaseType_t prvManufacturerInfo( char *pcWriteBuffer, size_t xWriteBufferL
 
     xsprintf(configstr, "%s", &manufacturerinfo[1]);
 	sprintf( pcWriteBuffer, "ManufacturerInfo\r\n : " );
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
 	xReturn = pdFALSE;
@@ -229,7 +229,7 @@ static BaseType_t prvDAStatus1( char *pcWriteBuffer, size_t xWriteBufferLen, con
     for(uint8_t i = 0; i < 15; i++){
         memset(configstr, 0, strlen(configstr));
         xsprintf(configstr, "Cell Voltage%2d 0x%04X (%5d)\r\n",i+1,  *(uint16_t *)(&dastatus1[2*i+1]), *(uint16_t *)(&dastatus1[2*i+1]));
-        strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+        strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     }
 
 	xReturn = pdFALSE;
@@ -265,35 +265,35 @@ static BaseType_t prvDAStatus2( char *pcWriteBuffer, size_t xWriteBufferLen, con
 
     xsprintf(configstr, "0x%04X (%5d)", VAUX_volt, VAUX_volt);
 	sprintf( pcWriteBuffer, "DAStatus2\r\nExtAveCellVoltage          : " );
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
 	strncat( pcWriteBuffer, (const char *)("\r\nVAUX Voltage               : "), strlen( "\r\nVAUX Voltage               : " ) );
     xsprintf(configstr, "0x%04X (%5d)", ExtAveCell_volt, ExtAveCell_volt);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nTS1 Temperature            : "), strlen( "\r\nTS1 Temperature            : " ) );
     xsprintf(configstr, "0x%04X (%5d)", TS1_temp, TS1_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nTS2 Temperature            : "), strlen( "\r\nTS2 Temperature            : " ) );
     xsprintf(configstr, "0x%04X (%5d)", TS2_temp, TS2_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nTS3 Temperature            : "), strlen( "\r\nTS3 Temperature            : " ) );
     xsprintf(configstr, "0x%04X (%5d)", TS3_temp, TS3_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nCell temperature           : "), strlen( "\r\nCell temperature           : " ) );
     xsprintf(configstr, "0x%04X (%5d)", Cell_temp, Cell_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nFET Temperature            : "), strlen( "\r\nFET Temperature            : " ) );
     xsprintf(configstr, "0x%04X (%5d)", FET_temp, FET_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     strncat( pcWriteBuffer, (const char *)("\r\nInternal Gauge Temperature : "), strlen( "\r\nInternal Gauge Temperature : " ) );
     xsprintf(configstr, "0x%04X (%5d)", Int_Gauge_temp, Int_Gauge_temp);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
@@ -322,7 +322,7 @@ static BaseType_t prvfet( char *pcWriteBuffer, size_t xWriteBufferLen, const cha
     BQ78350_Write(HOST_FET_CONTROL, &TxData, 1);
 
     sprintf( pcWriteBuffer, "HostFETControl");
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -353,10 +353,10 @@ static BaseType_t prvReadTemperatureEnable( char *pcWriteBuffer, size_t xWriteBu
     const uint8_t data = rxdata[3];
 	sprintf( pcWriteBuffer, "Data Flash : " );
     xsprintf(configstr, "0x%04X ", addr);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Read  : ", strlen( "Read  : " ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) "Read  : ", strlen( "Read  : " ) );
     xsprintf(configstr, "0x%02X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
 	xReturn = pdFALSE;
@@ -385,10 +385,10 @@ static BaseType_t prvWriteTemperatureEnable( char *pcWriteBuffer, size_t xWriteB
 
     sprintf( pcWriteBuffer, "Data Flash : " );
     xsprintf(configstr, "0x%04X ", addr);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Write : ", strlen( "Write : " ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) "Write : ", strlen( "Write : " ) );
     xsprintf(configstr, "0x%02X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -406,7 +406,7 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
 
-	char configstr[10] = {0};
+	char configstr[20] = {0};
     //ManufacturerBlockAccess()でAFE_CELL_MAP(0x44AC)の値を読み出し
     uint8_t txdata[3] = {0};
     txdata[0] = 0x02;
@@ -420,10 +420,10 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
 	sprintf( pcWriteBuffer, "Data Flash : " );
     xsprintf(configstr, "0x%04X ", addr);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Read  : ", strlen( "Read  : " ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) "Read  : ", strlen( "Read  : " ) );
     xsprintf(configstr, "0x%04X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
 	xReturn = pdFALSE;
@@ -468,19 +468,19 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
     xsprintf(configstr, "%4d.%d", temperature/10, temperature%10);
 	sprintf( pcWriteBuffer, "Temperature Unit : degree Celsius\r\nSBS Cmd (0x08) : " );
     xsprintf(configstr, "%3d.%d", temperature/10, temperature%10);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)("\r\nTS1            : "), strlen("\r\nTS1            : " ) );
     xsprintf(configstr, "%3d.%d", TS1_temp/10, TS1_temp%10);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\nTS2            : "), strlen("\r\nTS2            : " ) );
     xsprintf(configstr, "%3d.%d", TS2_temp/10, TS2_temp%10);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)("\r\nCell           : "), strlen("\r\nCell           : " ) );
     xsprintf(configstr, "%3d.%d", Cell_temp/10, Cell_temp%10);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)("\r\nInternal_Gauge : "), strlen("\r\nInternal_Gauge : " ) );
     xsprintf(configstr, "%3d.%d", Int_Gauge_temp/10, Int_Gauge_temp%10);
-    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( " degC\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -510,10 +510,10 @@ static BaseType_t prvReadFETOptions( char *pcWriteBuffer, size_t xWriteBufferLen
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
 	sprintf( pcWriteBuffer, "Data Flash : " );
     xsprintf(configstr, "0x%04X ", addr);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
-    strncat( pcWriteBuffer, ( char * ) "Read  : ", strlen( "Read  : " ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *) "Read  : ", strlen( "Read  : " ) );
     xsprintf(configstr, "0x%04X", data);
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
 	xReturn = pdFALSE;
@@ -543,7 +543,7 @@ static BaseType_t prvWriteAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLe
     HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
     
 	sprintf( pcWriteBuffer, "Data Flash : 0x44AC Write : 0x0273");
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -566,7 +566,7 @@ static BaseType_t prvLEDDisplayEnable( char *pcWriteBuffer, size_t xWriteBufferL
     BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
 
 	sprintf( pcWriteBuffer, "LEDDisplayEnable()");
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -589,7 +589,7 @@ static BaseType_t prvCHG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
     BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
 
 	sprintf( pcWriteBuffer, "CHG_FET()");
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -612,7 +612,7 @@ static BaseType_t prvDSG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
     BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
 
 	sprintf( pcWriteBuffer, "DSG_FET()");
-	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
