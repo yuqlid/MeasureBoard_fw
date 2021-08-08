@@ -258,7 +258,9 @@ static BaseType_t prvReadTemperatureEnable( char *pcWriteBuffer, size_t xWriteBu
 
 	char configstr[10] = {0};
     //ManufacturerBlockAccess()で0x44ACの値を読み出し
-    const uint8_t txdata[3] = {0x02, 0xA9, 0x44};
+    uint8_t txdata[3] = {0};
+    txdata[0] = 0x02;
+    *(uint16_t *)&txdata[1] = TEMPERATURE_ENABLE;
     const uint8_t rxdata[4] = {0};
 
     HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
@@ -321,13 +323,16 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
 	configASSERT( pcWriteBuffer );
 
 	char configstr[10] = {0};
-    //ManufacturerBlockAccess()で0x44ACの値を読み出し
-    const uint8_t txdata[3] = {0x02, 0xAC, 0x44};
+    //ManufacturerBlockAccess()でAFE_CELL_MAP(0x44AC)の値を読み出し
+    uint8_t txdata[3] = {0};
+    txdata[0] = 0x02;
+    *(uint16_t *)&txdata[1] = AFE_CELL_MAP;
     const uint8_t rxdata[5] = {0};
 
     HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
     const uint16_t addr = *(uint16_t *)(&rxdata[1]);
+    // 読み出すデータはビッグエンディアンらしい
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
 	sprintf( pcWriteBuffer, "Data Flash : " );
     xsprintf(configstr, "0x%04X ", addr);
@@ -445,8 +450,12 @@ static BaseType_t prvWriteAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLe
 	configASSERT( pcWriteBuffer );
 	char configstr[40] = {0};
     //ManufacturerBlockAccess()で0x44ACに0x0273を書き込み
-    //アクセスするアドレスはリトルエンディアンだけどデータはビッグエンディアン
-    uint8_t txdata[5] = {0x04,  0xAC, 0x44, 0x02, 0x73};
+    uint8_t txdata[5] = {0};
+    txdata[0] = 0x04;
+    *(uint16_t *)&txdata[1] = AFE_CELL_MAP;
+    //0x0273を書き込む．データはビッグエンディアンで扱うらしい
+    txdata[3] = 0x02;
+    txdata[4] = 0x73;
 
     HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
     
@@ -465,7 +474,6 @@ static BaseType_t prvLEDDisplayEnable( char *pcWriteBuffer, size_t xWriteBufferL
 	BaseType_t xReturn;
 	//static UBaseType_t uxParameterNumber = 0;
 
-    uint16_t  DevAddress = 0x16;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
@@ -489,7 +497,6 @@ static BaseType_t prvCHG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	BaseType_t xReturn;
 	//static UBaseType_t uxParameterNumber = 0;
 
-    uint16_t  DevAddress = 0x16;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
@@ -513,7 +520,6 @@ static BaseType_t prvDSG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	BaseType_t xReturn;
 	//static UBaseType_t uxParameterNumber = 0;
 
-    uint16_t  DevAddress = 0x16;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
@@ -553,12 +559,12 @@ static BaseType_t prvStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const 
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_CHEMISTRY, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceChemistryStr, sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]), 10);
 
 	sprintf( pcWriteBuffer, "ManufacturerName : ");
-	strncat( pcWriteBuffer, ( const char * ) (&ManufacturerNameStr[1]) , sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]) - 1 );
-    strncat( pcWriteBuffer, ( const char * ) NameStr, strlen( NameStr ) );
-    strncat( pcWriteBuffer, ( const char * ) (&DeviceNameStr[1]), sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]) - 1 );
-	strncat( pcWriteBuffer, ( const char *) ChemistryStr, strlen( ChemistryStr ) );
-    strncat( pcWriteBuffer, ( const char * ) (&DeviceChemistryStr[1]), sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]) - 1 );
-	strncat( pcWriteBuffer, ( const char *)("\r\n"), strlen( "\r\n" ) );
+	strncat( pcWriteBuffer, (const char *) (&ManufacturerNameStr[1]) , sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]) - 1 );
+    strncat( pcWriteBuffer, (const char *) NameStr, strlen( NameStr ) );
+    strncat( pcWriteBuffer, (const char *) (&DeviceNameStr[1]), sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]) - 1 );
+	strncat( pcWriteBuffer, (const char *) ChemistryStr, strlen( ChemistryStr ) );
+    strncat( pcWriteBuffer, (const char *) (&DeviceChemistryStr[1]), sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]) - 1 );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     xReturn = pdFALSE;
 	return xReturn;
 }
@@ -579,7 +585,7 @@ static const CLI_Command_Definition_t xParameterbq769x0_WriteRegister =
     2 /* Two parameters are expected. */
 };
 
-static const CLI_Command_Definition_t xParametervolt =
+static const CLI_Command_Definition_t xParameterVoltage =
 {
 	"volt",
 	"\r\nvolt:\r\n 0x09 Voltage\r\n 0x31 CellVoltage15\r\n   |       |      \r\n 0x3F CellVoltage1\r\n",
@@ -590,7 +596,7 @@ static const CLI_Command_Definition_t xParametervolt =
 static const CLI_Command_Definition_t xParameterRAFECellMap =
 {
 	"r_afe",
-	"\r\nr_afe:\r\n ManufacturerBlockAccess Write AFE Cell Map (0x44AC) to 0x0273\r\n",
+    "\r\nw_afe:\r\n ManufacturerBlockAccess Read AFE Cell Map (0x44AC)\r\n",
 	prvReadAFECellMap, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -598,7 +604,7 @@ static const CLI_Command_Definition_t xParameterRAFECellMap =
 static const CLI_Command_Definition_t xParameterWAFECellMap =
 {
 	"w_afe",
-	"\r\nw_afe:\r\n ManufacturerBlockAccess Read AFE Cell Map (0x44AC)\r\n",
+	"\r\nr_afe:\r\n ManufacturerBlockAccess Write AFE Cell Map (0x44AC) to 0x0273\r\n",
 	prvWriteAFECellMap, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -661,16 +667,16 @@ static const CLI_Command_Definition_t xParameterTemperature =
 
 static const CLI_Command_Definition_t xParameterWTemperatureEnable =
 {
-	"rtempen",
-	"\r\nrtempen:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	"r_tempen",
+	"\r\nr_tempen:\r\n ManufacturerBlockAccess Read Temperature Enable (0x44A9)\r\n",
 	prvReadTemperatureEnable, /* The function to run. */
 	0 /* No parameters are expected. */
 };
 
 static const CLI_Command_Definition_t xParameterRTemperatureEnable =
 {
-	"wtempen",
-	"\r\nwtempen:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	"w_tempen",
+	"\r\nw_tempen:\r\n ManufacturerBlockAccess Read Temperature Enable (0x44A9) to 0x0B\r\n",
 	prvWriteTemperatureEnable, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -687,18 +693,18 @@ void vRegisterbq78350CLICommands( void ){
 
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_WriteRegister );
-    FreeRTOS_CLIRegisterCommand( &xParametervolt );
+    FreeRTOS_CLIRegisterCommand( &xParameterVoltage );
     FreeRTOS_CLIRegisterCommand( &xParameterRAFECellMap );
     FreeRTOS_CLIRegisterCommand( &xParameterWAFECellMap );
-    FreeRTOS_CLIRegisterCommand( &xParameterfet );
+    FreeRTOS_CLIRegisterCommand( &xParameterWTemperatureEnable );
+    FreeRTOS_CLIRegisterCommand( &xParameterRTemperatureEnable );
+    //FreeRTOS_CLIRegisterCommand( &xParameterfet );
     FreeRTOS_CLIRegisterCommand( &xParameterReadFETOptions );
     FreeRTOS_CLIRegisterCommand( &xParameterLEDDisplayEnable );
     FreeRTOS_CLIRegisterCommand( &xParameterCHG_FET );
     FreeRTOS_CLIRegisterCommand( &xParameterDSG_FET );
     FreeRTOS_CLIRegisterCommand( &xParameterStatus );
     FreeRTOS_CLIRegisterCommand( &xParameterTemperature );
-    FreeRTOS_CLIRegisterCommand( &xParameterWTemperatureEnable );
-    FreeRTOS_CLIRegisterCommand( &xParameterRTemperatureEnable );
     FreeRTOS_CLIRegisterCommand( &xParameterDAStatus2 );
 
 }
