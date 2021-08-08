@@ -87,8 +87,8 @@
 #define LIFETIME_DATA_BLOCK_5
 #define LIFETIME_DATA_BLOCK_6
 #define LIFETIME_DATA_BLOCK_7
-#define MANUFACTURER_INFO
-#define DASTATUS_1
+#define MANUFACTURER_INFO                   0x70
+#define DASTATUS_1                          0x71
 #define DASTATUS_2                          0x72
 #define CUV_SNAPSHOT
 #define COV_SNAPSHOT
