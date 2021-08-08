@@ -19,7 +19,7 @@
 #define ATRATE_TIME_TO_FULL
 #define ATRATE_TIME_TO_EMPTY
 #define ATRATE_OK
-#define TEMPERATURE
+#define TEMPERATURE                         0x08
 #define VOLTAGE                             0x09
 #define CURRENT
 #define AVERAGE_CURRENT
@@ -40,10 +40,10 @@
 #define SPECIFICATION_INFO
 #define MANUFACTURER_DATE
 #define SERIALNUMBER
-#define MANUFACTURER_NAME
-#define DEVICE_NAME
-#define DEVICE_CHEMISTRY
-#define MANUFACTURER_DATA
+#define MANUFACTURER_NAME                   0x20
+#define DEVICE_NAME                         0x21
+#define DEVICE_CHEMISTRY                    0x22
+#define MANUFACTURER_DATA                   0x23
 #define HOST_FET_CONTROL                    0x2B
 #define GPIO_STATUS
 #define GPIO_CONTROL
@@ -98,8 +98,12 @@
 
 
 //Manufacturer Access Commands
+#define AFE_DELAY_DISABLE                   0x001C
+#define SAFE_TOGGLE                         0x001D
+#define PRE_CHG_FET                         0x001E
 #define CHG_FET                             0x001F
 #define DSG_FET                             0x0020
+#define FET_CONTROL                         0x0022
 #define LEDDISPLAYENABLE                    0x0027
 #define DEVICE_RESET						0x0041
 #define OPERATION_STATUS					0x0054
@@ -107,6 +111,10 @@
 
 //Data Flash Address
 //Configuration
+#define TS1_TEMPERATURE                     0x4200
+#define TS2_TEMPERATURE                     0x4202
+#define TS3_TEMPERATURE                     0x4204
+#define GAUGE_INTERNAL_TEMPERATURE          0x4206
 #define FET_OPTIONS							0x445F
 #define SBS_GAUGING_CONFIG					0x4461
 #define SMB_CONFIG							0x4462
@@ -148,8 +156,8 @@
 #define DESIGN_VOLTAGE_CONFIG				0x45D0
 
 //SBS Configuration
-#define MANUFACTURER_NAME					0x406F
-#define DEVICE_CHEMISTRY					0x4099
+//#define MANUFACTURER_NAME					0x406F
+//#define DEVICE_CHEMISTRY					0x4099
 #define INITIAL_BATT_MODE					0x44A5
 #define SPEC_INFO							0x44A7
 #define MANUFACTURING_STATUS_INIT			0x42C8

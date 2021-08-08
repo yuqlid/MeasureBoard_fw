@@ -151,7 +151,6 @@ static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
 	BaseType_t xReturn;
 	//static UBaseType_t uxParameterNumber = 0;
 
-    uint16_t  DevAddress = 0x16;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
@@ -160,13 +159,13 @@ static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
     uint16_t packVoltage = 0;
     uint16_t cellvoltage[15] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, DevAddress, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1000);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1000);
     xsprintf(configstr, "%5d", packVoltage);
 	sprintf( pcWriteBuffer, "Battery Voltage\r\nUnit : mV\r\nPack    : " );
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     for(int8_t i = 14; i >= 0 ; i--){
-        HAL_I2C_Mem_Read(&hi2c1, DevAddress, CELLVOLTAGE_15 + i, I2C_MEMADD_SIZE_8BIT, &cellvoltage[14 - i], 2, 1000);
+        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_15 + i, I2C_MEMADD_SIZE_8BIT, &cellvoltage[14 - i], 2, 1000);
         xsprintf(configstr, "Cell %2d : ", i + 1);
         strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
         xsprintf(configstr, "%5d", cellvoltage[i]);
@@ -205,6 +204,70 @@ static BaseType_t prvfet( char *pcWriteBuffer, size_t xWriteBufferLen, const cha
 	return xReturn;
 }
 
+static BaseType_t prvReadTemperatureEnable( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	char configstr[10] = {0};
+    //ManufacturerBlockAccess()で0x44ACの値を読み出し
+    const uint8_t txdata[3] = {0x02, 0xA9, 0x44};
+    const uint8_t rxdata[4] = {0};
+
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
+    const uint16_t addr = *(uint16_t *)(&rxdata[1]);
+    const uint8_t data = rxdata[3];
+	sprintf( pcWriteBuffer, "Data Flash : " );
+    xsprintf(configstr, "0x%04X ", addr);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, ( char * ) "Read  : ", strlen( "Read  : " ) );
+    xsprintf(configstr, "0x%02X", data);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+    
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvWriteTemperatureEnable( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	char configstr[40] = {0};
+    //ManufacturerBlockAccess()で0x44ACに0x0273を書き込み
+    //アクセスするアドレスはリトルエンディアンだけどデータはビッグエンディアン
+    uint8_t txdata[4] = {0x03,  0xA9, 0x44, 0x0B};
+    
+
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    uint16_t addr = *(uint16_t *)(&txdata[1]);
+    uint8_t data = txdata[3];
+
+    sprintf( pcWriteBuffer, "Data Flash : " );
+    xsprintf(configstr, "0x%04X ", addr);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, ( char * ) "Write : ", strlen( "Write : " ) );
+    xsprintf(configstr, "0x%02X", data);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	//const char *pcParameter;
@@ -212,7 +275,6 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
 	BaseType_t xReturn;
 	//static UBaseType_t uxParameterNumber = 0;
 
-    uint16_t  DevAddress = 0x16;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
@@ -222,8 +284,8 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
     const uint8_t txdata[3] = {0x02, 0xAC, 0x44};
     const uint8_t rxdata[5] = {0};
 
-    HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
-    HAL_I2C_Mem_Read(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
     const uint16_t addr = *(uint16_t *)(&rxdata[1]);
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
 	sprintf( pcWriteBuffer, "Data Flash : " );
@@ -233,6 +295,67 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
     xsprintf(configstr, "0x%04X", data);
 	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+    
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	char configstr[10] = {0};
+    uint8_t txdata[3] = {0x02, 0x00, 0x42};
+    uint8_t rxdata[5] = {0};
+    uint16_t temperature = 0;;
+    int16_t temperature_deg = 0;
+    
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, TEMPERATURE, I2C_MEMADD_SIZE_8BIT, &temperature, 2, 1000);
+
+    temperature_deg = temperature - 2731;
+    xsprintf(configstr, "%4d.%d", temperature/10, temperature%10);
+	sprintf( pcWriteBuffer, "Temperature\r\nPack : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)(" K ( "), strlen(" K ( " ) );
+    xsprintf(configstr, "%3d.%d", temperature_deg/10, temperature_deg%10);
+    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *)(" degC )\r\n"), strlen(" degC )\r\n" ) );
+
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
+    uint16_t addr = *(uint16_t *)(&rxdata[1]);
+    int16_t data = rxdata[3] << 8 | rxdata[4];
+	strncat( pcWriteBuffer, ( char * ) "Data Flash : ", strlen( "Data Flash : " ) );
+    xsprintf(configstr, "0x%04X ", addr);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, ( char * ) "Read : ", strlen( "Read : " ) );
+    xsprintf(configstr, "0x%04X", data);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+    txdata[1] = 0x02;
+
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
+    addr = *(uint16_t *)(&rxdata[1]);
+    data = rxdata[3] << 8 | rxdata[4];
+	//sprintf( pcWriteBuffer, "Data Flash : " );
+    strncat( pcWriteBuffer, ( char * ) "Data Flash : ", strlen( "Data Flash : " ) );
+    xsprintf(configstr, "0x%04X ", addr);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, ( char * ) "Read : ", strlen( "Read : " ) );
+    xsprintf(configstr, "0x%04X", data);
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+    
     
 	xReturn = pdFALSE;
 	return xReturn;
@@ -369,6 +492,39 @@ static BaseType_t prvDSG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	return xReturn;
 }
 
+static BaseType_t prvStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	char configstr[40] = {0};
+    const char NameStr[] = "\r\nDeviceName       : ";
+    const char ChemistryStr[] = "\r\nDeviceChemistry  : ";
+
+    uint8_t ManufacturerNameStr[18] = {0};
+    uint8_t DeviceNameStr[8] = {0};
+    uint8_t DeviceChemistryStr[5] = {0};
+
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)ManufacturerNameStr, sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceNameStr, sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]), 10);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_CHEMISTRY, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceChemistryStr, sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]), 10);
+
+	sprintf( pcWriteBuffer, "ManufacturerName : ");
+	strncat( pcWriteBuffer, ( const char * ) (&ManufacturerNameStr[1]) , sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]) - 1 );
+    strncat( pcWriteBuffer, ( const char * ) NameStr, strlen( NameStr ) );
+    strncat( pcWriteBuffer, ( const char * ) (&DeviceNameStr[1]), sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]) - 1 );
+	strncat( pcWriteBuffer, ( const char *) ChemistryStr, strlen( ChemistryStr ) );
+    strncat( pcWriteBuffer, ( const char * ) (&DeviceChemistryStr[1]), sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]) - 1 );
+	strncat( pcWriteBuffer, ( const char *)("\r\n"), strlen( "\r\n" ) );
+    xReturn = pdFALSE;
+	return xReturn;
+}
+
 static const CLI_Command_Definition_t xParameterbq769x0_ReadRegister =
 {
     "r",
@@ -388,7 +544,7 @@ static const CLI_Command_Definition_t xParameterbq769x0_WriteRegister =
 static const CLI_Command_Definition_t xParametervolt =
 {
 	"volt",
-	"\r\nvolt:\r\n Read Battery Voltage\r\n",
+	"\r\nvolt:\r\n 0x09 Voltage\r\n 0x31 CellVoltage15\r\n   |       |      \r\n 0x3F CellVoltage1\r\n",
 	prvvolt, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -449,6 +605,38 @@ static const CLI_Command_Definition_t xParameterDSG_FET =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterStatus =
+{
+	"name",
+	"\r\nname:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	prvStatus, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterTemperature =
+{
+	"temp",
+	"\r\ntemp:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	prvReadTemperature, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterWTemperatureEnable =
+{
+	"rtempen",
+	"\r\nrtempen:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	prvReadTemperatureEnable, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+static const CLI_Command_Definition_t xParameterRTemperatureEnable =
+{
+	"wtempen",
+	"\r\nwtempen:\r\n 0x20 ManufacturerName\r\n 0x21 DeviceName\r\n 0x22 DeviceChemistry\r\n",
+	prvWriteTemperatureEnable, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterbq78350CLICommands( void ){
 
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
@@ -461,5 +649,9 @@ void vRegisterbq78350CLICommands( void ){
     FreeRTOS_CLIRegisterCommand( &xParameterLEDDisplayEnable );
     FreeRTOS_CLIRegisterCommand( &xParameterCHG_FET );
     FreeRTOS_CLIRegisterCommand( &xParameterDSG_FET );
+    FreeRTOS_CLIRegisterCommand( &xParameterStatus );
+    FreeRTOS_CLIRegisterCommand( &xParameterTemperature );
+    FreeRTOS_CLIRegisterCommand( &xParameterWTemperatureEnable );
+    FreeRTOS_CLIRegisterCommand( &xParameterRTemperatureEnable );
 
 }
