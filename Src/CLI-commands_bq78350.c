@@ -162,12 +162,12 @@ static BaseType_t prvVoltage( char *pcWriteBuffer, size_t xWriteBufferLen, const
     uint16_t packVoltage = 0;
     uint16_t cellvoltage[15] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1000);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1);
 	sprintf( pcWriteBuffer, "Battery Voltage Unit : V\r\n" );
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     for(int8_t i = 0; i < Cell_Serial ; i++){
-        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_1 - i, I2C_MEMADD_SIZE_8BIT, cellvoltage + i, 2, 1000);
+        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_1 - i, I2C_MEMADD_SIZE_8BIT, cellvoltage + i, 2, 1);
         xsprintf(configstr, "Cell %2d : ", i + 1);
         strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
         xsprintf(configstr, "%2d.%03d", cellvoltage[i]/1000, cellvoltage[i]%1000);
