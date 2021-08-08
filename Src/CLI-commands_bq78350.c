@@ -39,7 +39,7 @@ static BaseType_t prvReadRegister( char *pcWriteBuffer, size_t xWriteBufferLen, 
         if(pcParameter != NULL){
 
             map = strtol(pcParameter, NULL , 16);
-			BQ78350_Read((uint8_t)map, &rxdata, 1);
+			BQ78350_ReadWord((uint8_t)map, &rxdata);
             xsprintf(str, "0x%02x", rxdata);
 
             memset( pcWriteBuffer, 0x00, xWriteBufferLen );
@@ -109,11 +109,11 @@ static BaseType_t prvWriteRegister( char *pcWriteBuffer, size_t xWriteBufferLen,
         if(uxParameterNumber == 2){
             registerdata = strtol(pcParameter, NULL , 16);
             txdata |= (0xFFFF & registerdata);
-			BQ78350_Write((uint8_t)map, &txdata, 1);
+			BQ78350_WriteWord((uint8_t)map, &txdata);
 
             osDelay(20);
 
-			BQ78350_Read((uint8_t)map, &rxdata, 1);
+			BQ78350_ReadWord((uint8_t)map, &rxdata);
             
             xsprintf(str, "0x%02x", rxdata);
             xsprintf(str2, "0x%02x", txdata & 0xFF);
@@ -162,7 +162,7 @@ static BaseType_t prvVoltage( char *pcWriteBuffer, size_t xWriteBufferLen, const
     uint16_t packVoltage = 0;
     uint16_t cellvoltage[15] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, VOLTAGE, I2C_MEMADD_SIZE_8BIT, &packVoltage, 2, 1);
+    BQ78350_ReadWord(VOLTAGE, &packVoltage);
 	sprintf( pcWriteBuffer, "Battery Voltage Unit : V\r\n" );
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
@@ -177,6 +177,34 @@ static BaseType_t prvVoltage( char *pcWriteBuffer, size_t xWriteBufferLen, const
     strncat( pcWriteBuffer, (const char *)  "Pack    : ", strlen( "Pack    : " ) );
     xsprintf(configstr, "%2d.%03d", packVoltage/1000, packVoltage%1000);
     strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
+    strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
+static BaseType_t prvBatteryStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+    // Battery Cell Serial Number 1~15
+    const uint8_t Cell_Serial = 6;
+
+	char configstr[20] = {0};
+    uint16_t Status = 0;
+    uint16_t cellvoltage[15] = {0};
+
+    BQ78350_ReadWord(BATTERY_STATUS, &Status);
+	sprintf( pcWriteBuffer, "Battery Status\r\n" );
+    xsprintf(configstr, "0x%04X", Status);
+	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
 
 	xReturn = pdFALSE;
@@ -316,10 +344,10 @@ static BaseType_t prvfet( char *pcWriteBuffer, size_t xWriteBufferLen, const cha
 	uint16_t	TxData = 0x1197;
 	char configstr[10] = {0};
 
-    BQ78350_Write(HOST_FET_CONTROL, &TxData, 1);
+    BQ78350_WriteWord(HOST_FET_CONTROL, &TxData);
     osDelay(1);
     TxData = 0x03;
-    BQ78350_Write(HOST_FET_CONTROL, &TxData, 1);
+    BQ78350_WriteWord(HOST_FET_CONTROL, &TxData);
 
     sprintf( pcWriteBuffer, "HostFETControl");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
@@ -446,7 +474,8 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
     int16_t temperature = 0;;
     uint8_t dastatus2[17] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, TEMPERATURE, I2C_MEMADD_SIZE_8BIT, &temperature, 2, 1000);
+    //HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, TEMPERATURE, I2C_MEMADD_SIZE_8BIT, &temperature, 2, 1000);
+    BQ78350_ReadWord(TEMPERATURE, &temperature);
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_2, I2C_MEMADD_SIZE_8BIT, dastatus2, 17, 1000);
 
     // Temperature  Unit : 0.1 K[degC]
@@ -563,7 +592,7 @@ static BaseType_t prvLEDDisplayEnable( char *pcWriteBuffer, size_t xWriteBufferL
 	char configstr[40] = {0};
 
     uint16_t txdata = LEDDISPLAYENABLE;
-    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+    BQ78350_WriteWord(MANUFACTURER_ACCESS, (uint8_t *)&txdata);
 
 	sprintf( pcWriteBuffer, "LEDDisplayEnable()");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
@@ -586,7 +615,7 @@ static BaseType_t prvCHG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	char configstr[40] = {0};
 
     uint16_t txdata = CHG_FET;
-    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+    BQ78350_WriteWord(MANUFACTURER_ACCESS, &txdata);
 
 	sprintf( pcWriteBuffer, "CHG_FET()");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
@@ -609,7 +638,7 @@ static BaseType_t prvDSG_TET( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	char configstr[40] = {0};
 
     uint16_t txdata = DSG_FET;
-    BQ78350_Write(MANUFACTURER_ACCESS, (uint8_t *)&txdata, 1);
+    BQ78350_WriteWord(MANUFACTURER_ACCESS, &txdata);
 
 	sprintf( pcWriteBuffer, "DSG_FET()");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
@@ -632,14 +661,18 @@ static BaseType_t prvStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const 
 	char configstr[40] = {0};
     const char NameStr[] = "\r\nDeviceName       : ";
     const char ChemistryStr[] = "\r\nDeviceChemistry  : ";
+    const char SpecInfoStr[] = "\r\nSpecificationInfo : ";
 
     uint8_t ManufacturerNameStr[18] = {0};
     uint8_t DeviceNameStr[8] = {0};
     uint8_t DeviceChemistryStr[5] = {0};
+    uint8_t specinfo[2] = {0};
 
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)ManufacturerNameStr, sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]), 100);
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceNameStr, sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]), 100);
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_CHEMISTRY, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceChemistryStr, sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]), 100);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, SPECIFICATION_INFO, I2C_MEMADD_SIZE_8BIT, (uint8_t *)specinfo, sizeof(specinfo)/sizeof(specinfo[0]), 100);
+    BQ78350_ReadWord(SPECIFICATION_INFO, (uint16_t *)specinfo);
 
 	sprintf( pcWriteBuffer, "ManufacturerName : ");
 	strncat( pcWriteBuffer, (const char *) (&ManufacturerNameStr[1]) , sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]) - 1 );
@@ -647,6 +680,9 @@ static BaseType_t prvStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const 
     strncat( pcWriteBuffer, (const char *) (&DeviceNameStr[1]), sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]) - 1 );
 	strncat( pcWriteBuffer, (const char *) ChemistryStr, strlen( ChemistryStr ) );
     strncat( pcWriteBuffer, (const char *) (&DeviceChemistryStr[1]), sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]) - 1 );
+    xsprintf(configstr, "0x%04X ", *(uint16_t *)specinfo);
+    strncat( pcWriteBuffer, (const char *) SpecInfoStr, strlen( SpecInfoStr ) );
+    strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     xReturn = pdFALSE;
 	return xReturn;
@@ -788,6 +824,14 @@ static const CLI_Command_Definition_t xParameterDAStatus2 =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterBatteryStatus =
+{
+	"status",
+	"\r\nstatus:\r\n 0x16 BatteryStatus\r\n",
+	prvBatteryStatus, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterbq78350CLICommands( void ){
 
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
@@ -807,5 +851,6 @@ void vRegisterbq78350CLICommands( void ){
     FreeRTOS_CLIRegisterCommand( &xParameterManufacturerInfo );
     FreeRTOS_CLIRegisterCommand( &xParameterDAStatus1 );
     FreeRTOS_CLIRegisterCommand( &xParameterDAStatus2 );
+    FreeRTOS_CLIRegisterCommand( &xParameterBatteryStatus );
 
 }

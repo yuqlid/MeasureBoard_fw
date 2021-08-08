@@ -33,11 +33,11 @@
 #define AVERAGE_TIME_TO_FULL
 #define CHARGING_CURRENT
 #define CHARGING_VOLTAGE
-#define BATTERY_STATUS
+#define BATTERY_STATUS                      0x16
 #define CYCLE_COUNT
 #define DESIGN_CAPACITY
 #define DESIGN_VOLTAGE
-#define SPECIFICATION_INFO
+#define SPECIFICATION_INFO                  0x1A
 #define MANUFACTURER_DATE
 #define SERIALNUMBER
 #define MANUFACTURER_NAME                   0x20
