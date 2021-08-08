@@ -176,6 +176,40 @@ static BaseType_t prvvolt( char *pcWriteBuffer, size_t xWriteBufferLen, const ch
 	return xReturn;
 }
 
+static BaseType_t prvDAStatus2( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	//const char *pcParameter;
+	//BaseType_t xParameterStringLength;
+	BaseType_t xReturn;
+	//static UBaseType_t uxParameterNumber = 0;
+
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+
+	char configstr[20] = {0};
+    uint8_t dastatus2[17] = {0};
+
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_2, I2C_MEMADD_SIZE_8BIT, dastatus2, 17, 1000);
+    
+    const int16_t K2degC = 2731;    // Unit : 0.1 K[degC]
+    int16_t TS1_temp = *(int16_t *)(&dastatus2[5]); // Unit : 0.1 K[degC]
+    int16_t TS2_temp = *(int16_t *)(&dastatus2[7]); // Unit : 0.1 K[degC]
+    TS1_temp -= K2degC;
+    TS2_temp -= K2degC;
+
+    xsprintf(configstr, "%4d.%d", TS1_temp/10, TS1_temp%10);
+	sprintf( pcWriteBuffer, "DAStatus2\r\nTS1_Temperature : " );
+	strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\nTS2_Temperature : "), strlen( "\r\nTS2_Temperature : " ) );
+    xsprintf(configstr, "%4d.%d", TS2_temp/10, TS2_temp%10);
+    strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
+	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
+    
+	xReturn = pdFALSE;
+	return xReturn;
+}
+
 static BaseType_t prvfet( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	//const char *pcParameter;
@@ -312,8 +346,7 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
 	configASSERT( pcWriteBuffer );
 
 	char configstr[10] = {0};
-    uint8_t txdata[3] = {0x02, 0x00, 0x42};
-    uint8_t rxdata[5] = {0};
+    
     uint16_t temperature = 0;;
     int16_t temperature_deg = 0;
     
@@ -327,6 +360,9 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
     xsprintf(configstr, "%3d.%d", temperature_deg/10, temperature_deg%10);
     strncat( pcWriteBuffer, ( char * ) configstr, strlen( configstr ) );
     strncat( pcWriteBuffer, (const char *)(" degC )\r\n"), strlen(" degC )\r\n" ) );
+
+    uint8_t txdata[3] = {0x02, 0x00, 0x42};
+    uint8_t rxdata[5] = {0};
 
     HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 10);
     HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 10);
@@ -637,6 +673,14 @@ static const CLI_Command_Definition_t xParameterRTemperatureEnable =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xParameterDAStatus2 =
+{
+	"da2",
+	"\r\nda2:\r\n 0x72 DAStatus2\r\n",
+	prvDAStatus2, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 void vRegisterbq78350CLICommands( void ){
 
 	FreeRTOS_CLIRegisterCommand( &xParameterbq769x0_ReadRegister );
@@ -653,5 +697,6 @@ void vRegisterbq78350CLICommands( void ){
     FreeRTOS_CLIRegisterCommand( &xParameterTemperature );
     FreeRTOS_CLIRegisterCommand( &xParameterWTemperatureEnable );
     FreeRTOS_CLIRegisterCommand( &xParameterRTemperatureEnable );
+    FreeRTOS_CLIRegisterCommand( &xParameterDAStatus2 );
 
 }
