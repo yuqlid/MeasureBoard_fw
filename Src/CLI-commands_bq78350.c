@@ -227,8 +227,8 @@ static BaseType_t prvManufacturerInfo( char *pcWriteBuffer, size_t xWriteBufferL
 
     BQ78350_ReadBlock(MANUFACTURER_INFO, manufacturerinfo, sizeof(manufacturerinfo)/sizeof(manufacturerinfo[0]));
 
-    xsprintf(configstr, "%s", &manufacturerinfo[1]);
 	sprintf( pcWriteBuffer, "ManufacturerInfo\r\n : " );
+    strncat( pcWriteBuffer, (const char *) (&manufacturerinfo[1]) , sizeof(manufacturerinfo)/sizeof(manufacturerinfo[0]) - 1 );
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
     
@@ -591,8 +591,7 @@ static BaseType_t prvLEDDisplayEnable( char *pcWriteBuffer, size_t xWriteBufferL
 	char configstr[40] = {0};
 
     uint16_t txdata = LEDDISPLAYENABLE;
-    BQ78350_WriteWord(MANUFACTURER_ACCESS, (uint8_t *)&txdata);
-
+    BQ78350_WriteWord(MANUFACTURER_ACCESS, &txdata);
 	sprintf( pcWriteBuffer, "LEDDisplayEnable()");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );

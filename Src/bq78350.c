@@ -40,5 +40,10 @@ void BQ78350_ReadBlock(uint8_t addr, uint8_t *pData, uint16_t len){
 
 void BQ78350_WriteBlock(uint8_t addr, uint8_t *pData, uint16_t len){
 
-   // HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, len, 1000);
+    uint8_t txdata[255] = {0};
+    txdata[0] = addr;
+    memcpy(&txdata[1], pData, len);
+    HAL_SMBUS_Master_Transmit_IT(&hsmbus1, BQ78350_I2C_ADDR, txdata, len + 1, SMBUS_FIRST_AND_LAST_FRAME_NO_PEC);
+    while(HAL_SMBUS_GetState(&hsmbus1) != HAL_SMBUS_STATE_READY);
+
 }
