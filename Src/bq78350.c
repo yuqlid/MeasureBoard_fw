@@ -10,30 +10,30 @@
 
 void BQ78350_ReadByte(uint8_t addr, uint8_t *pData){
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 1, 1000);
+    BQ78350_ReadBlock(addr, (uint8_t *)pData, 1) ;
 }
 
 void BQ78350_WriteByte(uint8_t addr, uint8_t *pData){
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 1, 1000);
+    BQ78350_WriteBlock(addr, (uint8_t *)pData, 1) ;
 }
 
 void BQ78350_ReadWord(uint8_t addr, uint16_t *pData){
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2, 1000);
+    BQ78350_ReadBlock(addr, (uint8_t *)pData, 2) ;
 }
 
 void BQ78350_WriteWord(uint8_t addr, uint16_t *pData){
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2, 1000);
+    BQ78350_WriteBlock(addr, (uint8_t *)pData, 2) ;
 }
 
 void BQ78350_ReadBlock(uint8_t addr, uint8_t *pData, uint16_t len){
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2 * len, 1000);
+    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, len, 1000);
 }
 
 void BQ78350_WriteBlock(uint8_t addr, uint8_t *pData, uint16_t len){
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, 2 * len, 1000);
+    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, addr, I2C_MEMADD_SIZE_8BIT, (uint8_t *)pData, len, 1000);
 }

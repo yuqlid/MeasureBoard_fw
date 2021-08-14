@@ -167,7 +167,7 @@ static BaseType_t prvVoltage( char *pcWriteBuffer, size_t xWriteBufferLen, const
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 
     for(int8_t i = 0; i < Cell_Serial ; i++){
-        HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, CELLVOLTAGE_1 - i, I2C_MEMADD_SIZE_8BIT, cellvoltage + i, 2, 1);
+        BQ78350_ReadWord(CELLVOLTAGE_1 - i, cellvoltage + i);
         xsprintf(configstr, "Cell %2d : ", i + 1);
         strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
         xsprintf(configstr, "%2d.%03d", cellvoltage[i]/1000, cellvoltage[i]%1000);
@@ -225,7 +225,7 @@ static BaseType_t prvManufacturerInfo( char *pcWriteBuffer, size_t xWriteBufferL
 	char configstr[40] = {0};
     uint8_t manufacturerinfo[33] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_INFO, I2C_MEMADD_SIZE_8BIT, manufacturerinfo, sizeof(manufacturerinfo)/sizeof(manufacturerinfo[0]), 1000);
+    BQ78350_ReadBlock(MANUFACTURER_INFO, manufacturerinfo, sizeof(manufacturerinfo)/sizeof(manufacturerinfo[0]));
 
     xsprintf(configstr, "%s", &manufacturerinfo[1]);
 	sprintf( pcWriteBuffer, "ManufacturerInfo\r\n : " );
@@ -250,7 +250,7 @@ static BaseType_t prvDAStatus1( char *pcWriteBuffer, size_t xWriteBufferLen, con
 	char configstr[40] = {0};
     uint8_t dastatus1[33] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_1, I2C_MEMADD_SIZE_8BIT, dastatus1, sizeof(dastatus1)/sizeof(dastatus1[0]), 1000);
+    BQ78350_ReadBlock(DASTATUS_1, dastatus1, sizeof(dastatus1)/sizeof(dastatus1[0]));
 
     xsprintf(pcWriteBuffer, "DAStatus1\r\n");
 
@@ -278,7 +278,7 @@ static BaseType_t prvDAStatus2( char *pcWriteBuffer, size_t xWriteBufferLen, con
 	char configstr[20] = {0};
     uint8_t dastatus2[17] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_2, I2C_MEMADD_SIZE_8BIT, dastatus2, sizeof(dastatus2)/sizeof(dastatus2[0]), 1000);
+    BQ78350_ReadBlock(DASTATUS_2, dastatus2, sizeof(dastatus2)/sizeof(dastatus2[0]));
     
     // Voltage  Unit : mV
     uint16_t VAUX_volt = *(uint16_t *)(&dastatus2[1]);;
@@ -373,10 +373,10 @@ static BaseType_t prvReadTemperatureEnable( char *pcWriteBuffer, size_t xWriteBu
     uint8_t txdata[3] = {0};
     txdata[0] = 0x02;
     *(uint16_t *)&txdata[1] = TEMPERATURE_ENABLE;
-    const uint8_t rxdata[4] = {0};
+    uint8_t rxdata[4] = {0};
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 100);
+    BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
+    BQ78350_ReadBlock(MANUFACTURER_BLOCK_ACCESS, rxdata, sizeof(rxdata)/sizeof(rxdata[0]));
     const uint16_t addr = *(uint16_t *)(&rxdata[1]);
     const uint8_t data = rxdata[3];
 	sprintf( pcWriteBuffer, "Data Flash : " );
@@ -407,7 +407,7 @@ static BaseType_t prvWriteTemperatureEnable( char *pcWriteBuffer, size_t xWriteB
     uint8_t txdata[4] = {0x03,  0xA9, 0x44, 0x0B};
     
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
+    BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
     uint16_t addr = *(uint16_t *)(&txdata[1]);
     uint8_t data = txdata[3];
 
@@ -439,10 +439,10 @@ static BaseType_t prvReadAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLen
     uint8_t txdata[3] = {0};
     txdata[0] = 0x02;
     *(uint16_t *)&txdata[1] = AFE_CELL_MAP;
-    const uint8_t rxdata[5] = {0};
+    uint8_t rxdata[5] = {0};
 
-    HAL_I2C_Mem_Write(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 100);
+    BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
+    BQ78350_ReadBlock(MANUFACTURER_BLOCK_ACCESS, rxdata, sizeof(rxdata)/sizeof(rxdata[0]));
     const uint16_t addr = *(uint16_t *)(&rxdata[1]);
     // 読み出すデータはビッグエンディアンらしい
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
@@ -474,9 +474,8 @@ static BaseType_t prvReadTemperature( char *pcWriteBuffer, size_t xWriteBufferLe
     int16_t temperature = 0;;
     uint8_t dastatus2[17] = {0};
 
-    //HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, TEMPERATURE, I2C_MEMADD_SIZE_8BIT, &temperature, 2, 1000);
     BQ78350_ReadWord(TEMPERATURE, &temperature);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DASTATUS_2, I2C_MEMADD_SIZE_8BIT, dastatus2, 17, 1000);
+    BQ78350_ReadBlock(DASTATUS_2, dastatus2, 17);
 
     // Temperature  Unit : 0.1 K[degC]
     int16_t TS1_temp = *(int16_t *)(&dastatus2[5]);
@@ -531,10 +530,10 @@ static BaseType_t prvReadFETOptions( char *pcWriteBuffer, size_t xWriteBufferLen
 	char configstr[10] = {0};
     //ManufacturerBlockAccess()で0x44ACの値を読み出し
     const uint8_t txdata[3] = {0x02, 0x5F, 0x44};
-    const uint8_t rxdata[5] = {0};
+    uint8_t rxdata[5] = {0};
 
-    HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, rxdata, sizeof(rxdata)/sizeof(rxdata[0]), 100);
+    BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
+    BQ78350_ReadBlock(MANUFACTURER_BLOCK_ACCESS, rxdata, sizeof(rxdata)/sizeof(rxdata[0]));
     const uint16_t addr = *(uint16_t *)(&rxdata[1]);
     const uint16_t data = rxdata[3] << 8 | rxdata[4];
 	sprintf( pcWriteBuffer, "Data Flash : " );
@@ -569,8 +568,8 @@ static BaseType_t prvWriteAFECellMap( char *pcWriteBuffer, size_t xWriteBufferLe
     txdata[3] = 0x02;
     txdata[4] = 0x73;
 
-    HAL_I2C_Mem_Write(&hi2c1, DevAddress, MANUFACTURER_BLOCK_ACCESS, I2C_MEMADD_SIZE_8BIT, txdata, sizeof(txdata)/sizeof(txdata[0]), 100);
-    
+    BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
+
 	sprintf( pcWriteBuffer, "Data Flash : 0x44AC Write : 0x0273");
 	strncat( pcWriteBuffer, (const char *) configstr, strlen( configstr ) );
 	strncat( pcWriteBuffer, (const char *)("\r\n"), strlen( "\r\n" ) );
@@ -668,10 +667,9 @@ static BaseType_t prvStatus( char *pcWriteBuffer, size_t xWriteBufferLen, const 
     uint8_t DeviceChemistryStr[5] = {0};
     uint8_t specinfo[2] = {0};
 
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, MANUFACTURER_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)ManufacturerNameStr, sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_NAME, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceNameStr, sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, DEVICE_CHEMISTRY, I2C_MEMADD_SIZE_8BIT, (uint8_t *)DeviceChemistryStr, sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]), 100);
-    HAL_I2C_Mem_Read(&hi2c1, BQ78350_I2C_ADDR, SPECIFICATION_INFO, I2C_MEMADD_SIZE_8BIT, (uint8_t *)specinfo, sizeof(specinfo)/sizeof(specinfo[0]), 100);
+    BQ78350_ReadBlock(MANUFACTURER_NAME, (uint8_t *)ManufacturerNameStr, sizeof(ManufacturerNameStr)/sizeof(ManufacturerNameStr[0]));
+    BQ78350_ReadBlock(DEVICE_NAME, (uint8_t *)DeviceNameStr, sizeof(DeviceNameStr)/sizeof(DeviceNameStr[0]));
+    BQ78350_ReadBlock(DEVICE_CHEMISTRY, (uint8_t *)DeviceChemistryStr, sizeof(DeviceChemistryStr)/sizeof(DeviceChemistryStr[0]));
     BQ78350_ReadWord(SPECIFICATION_INFO, (uint16_t *)specinfo);
 
 	sprintf( pcWriteBuffer, "ManufacturerName : ");
