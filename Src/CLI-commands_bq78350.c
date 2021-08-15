@@ -404,8 +404,10 @@ static BaseType_t prvWriteTemperatureEnable( char *pcWriteBuffer, size_t xWriteB
 	char configstr[40] = {0};
     //ManufacturerBlockAccess()で0x44ACに0x0273を書き込み
     //アクセスするアドレスはリトルエンディアンだけどデータはビッグエンディアン
-    uint8_t txdata[4] = {0x03,  0xA9, 0x44, 0x0B};
-    
+    uint8_t txdata[4] = {0};
+    txdata[0] = 0x03;
+    *(uint16_t *)&txdata[1] = TEMPERATURE_ENABLE;
+    txdata[3] = 0x0B;
 
     BQ78350_WriteBlock(MANUFACTURER_BLOCK_ACCESS, txdata, sizeof(txdata)/sizeof(txdata[0]));
     uint16_t addr = *(uint16_t *)(&txdata[1]);
