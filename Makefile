@@ -97,14 +97,15 @@ Middlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c \
 Src/Sample-CLI-commands.c \
 Src/UARTCommandConsole.c \
 Src/CLI-commands.c \
+Src/CLI-commands_Scramble.c \
 Src/scramble_tasks.c \
 FreeRTOS_helpers/port_DRN.c \
 FreeRTOS_helpers/heap_useNewlib_ST.c \
 xprintf/xprintf.c \
 src/CLI-commands_MA7xx.c \
-src/MA7xx.c \
+src/mps_encoder/MA7xx.c \
 src/HEDL5540.c \
-src/bq78350.c \
+src/bms/bq78350.c \
 src/CLI-commands_bq78350.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_smbus.c
 
@@ -178,7 +179,9 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 -IMiddlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI \
 -IMiddlewares/ST/ARM/DSP/Inc \
--Ixprintf
+-Ixprintf \
+-IInc/bms \
+-IInc/mps_encoder \
 
 # float option
 # -Wfloat-conversion			doubleからfloatへ暗黙の型変換が発生したときに警告
