@@ -36,33 +36,13 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pcd_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_can.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_i2c.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_i2c_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_spi.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_spi_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_uart.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_uart_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_gpio.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_dma.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_cortex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr_ex.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash_ex.c \
+$(wildcard Drivers/STM32F3xx_HAL_Driver/Src/*.c) \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 Src/syscalls.c \
-Src/AMT23.c \
+Src/cui_encoder/AMT23.c \
 BSP/MeasurementBoard_v1.c \
 Src/main.c \
 Src/gpio.c \
@@ -78,35 +58,27 @@ Src/usbd_desc.c \
 Src/usbd_cdc_if.c \
 Src/stm32f3xx_it.c \
 Src/stm32f3xx_hal_msp.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usb.c \
-Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_exti.c \
 Src/system_stm32f3xx.c \
 Src/freertos.c \
 Src/stm32f3xx_hal_timebase_tim.c \
-Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
-Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
-Middlewares/Third_Party/FreeRTOS/Source/list.c \
-Middlewares/Third_Party/FreeRTOS/Source/queue.c \
-Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
-Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+$(wildcard Middlewares/Third_Party/FreeRTOS/Source/*.c ) \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c \
 Src/FreeRTOS-openocd.c \
 Src/rs485.c \
 Middlewares/Third_Party/FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c \
-Src/Sample-CLI-commands.c \
-Src/UARTCommandConsole.c \
-Src/CLI-commands.c \
-Src/CLI-commands_Scramble.c \
+Src/CLI/Sample-CLI-commands.c \
+Src/CLI/UARTCommandConsole.c \
+Src/CLI/CLI-commands.c \
+Src/CLI/CLI-commands_Scramble.c \
 Src/scramble_tasks.c \
 FreeRTOS_helpers/port_DRN.c \
 FreeRTOS_helpers/heap_useNewlib_ST.c \
 xprintf/xprintf.c \
-src/CLI-commands_MA7xx.c \
+src/CLI/CLI-commands_MA7xx.c \
 src/mps_encoder/MA7xx.c \
 src/HEDL5540.c \
 src/bms/bq78350.c \
-src/CLI-commands_bq78350.c \
+src/CLI/CLI-commands_bq78350.c \
 Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_smbus.c
 
 # ASM sources
@@ -182,6 +154,9 @@ C_INCLUDES =  \
 -Ixprintf \
 -IInc/bms \
 -IInc/mps_encoder \
+-IInc/eeprom \
+-IInc/cui_encoder \
+-IInc/CLI \
 
 # float option
 # -Wfloat-conversion			doubleからfloatへ暗黙の型変換が発生したときに警告
