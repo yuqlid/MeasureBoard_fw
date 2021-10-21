@@ -40,6 +40,8 @@
 #include "eeprom_CLI-commands.h"
 #include "CLI-commands_bq769x0.h"
 #include "CLI-commands_bq78350.h"
+#include "CLI-commands_Scramble.h"
+
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
@@ -154,15 +156,18 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+  
+  // USBのリセット
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, RESET);
+  
   setbuf(stdout, NULL );
   //UART_Util_Init(&huart1);
   //uint8_t a = 'B';
   //HAL_UART_Transmit(&huart1, &a, 1, 100);
   printf("\r\n%s,%s\r\n",__DATE__,__TIME__);
   printf("MeasurementBoard_fw\r\n");
-  // Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
+  //Encoder_Init(&hspi1, RES_12BIT, htim17.Init.Period, htim17.Init.Prescaler);
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
@@ -170,19 +175,20 @@ int main(void)
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
-  //vRegisterScrambleCLICommands();
+  vRegisterCLICommands();
   //vRegisterbq34z100G1CLICommands();
   //vRegisterMA7xxCLICommands();
-  //HEDL5540_Encoder_Init(&htim2);
+  HEDL5540_Encoder_Init(&htim2);
   //vRegisterEEPROMCLICommands();
   //vRegisterbq769x0CLICommands();
-  vRegisterbq78350CLICommands();
+  //vRegisterbq78350CLICommands();
+  vRegisterScrambleWheelCLICommands();
   scramble_RegisterTasks();
   
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(rs485DribbleTaskHandle);
-  osThreadSuspend(COMSendTaskHandle);
-  osThreadSuspend(EncoderProcessTaskHandle);
+  //osThreadSuspend(COMSendTaskHandle);
+  //osThreadSuspend(EncoderProcessTaskHandle);
 
   
   vUARTCommandConsoleStart();

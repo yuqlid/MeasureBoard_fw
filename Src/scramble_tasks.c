@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include "usbd_cdc_if.h"
 #include "cmsis_os.h"
+#include "HEDL5540.h"
 
 extern osSemaphoreId RS485transmitSemaphoreHandle;
 
@@ -128,9 +129,10 @@ void COMSendTask(void const * argument){
         static uint8_t i =0;
         //MechSpeed_RPM = GetVelcity_RPM();
         LED_Toggle(LED0);
-        osDelay(2);
+        osDelay(10);
         //MC_Speed_Filter();
-        com_printf("%5ld,%5ld\r\n", target_speed_rpm, speed_rpm_fil);
+        //com_printf("%5ld,%5ld\r\n", target_speed_rpm, speed_rpm_fil);
+        com_printf("%ld\r\n", GetCount_raw());
         i++;
 
         if(i >= 4){
@@ -141,10 +143,10 @@ void COMSendTask(void const * argument){
 }
 
 void scramble_RegisterTasks(void){
-
+    /*
     osThreadStaticDef(encoderprocessTask, EncoderProcessTask, osPriorityNormal, 0, 256, EncoderProcessTaskBuffer, &EncoderProcessTaskControlBlock);
     EncoderProcessTaskHandle = osThreadCreate(osThread(encoderprocessTask), NULL);
-
+    */
     osThreadStaticDef(rs485dribbleTask, rs485DribbleTask, osPriorityNormal, 0, 256, rs485DribbleTaskBuffer, &rs485DribbleTaskControlBlock);
     rs485DribbleTaskHandle = osThreadCreate(osThread(rs485dribbleTask), NULL);
 

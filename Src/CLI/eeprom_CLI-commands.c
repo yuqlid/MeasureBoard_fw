@@ -13,6 +13,7 @@
 #include "i2c.h"
 #include <stdio.h>
 
+#ifdef hi2c1
 static BaseType_t prvWriteall( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	//const char *pcParameter;
@@ -222,3 +223,5 @@ void vRegisterEEPROMCLICommands( void ){
 	
 	
 }
+
+#endif
