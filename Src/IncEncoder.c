@@ -5,10 +5,10 @@
  *      Author: Yuki Kusakabe
  */
 
-#include "cmsis_os.h"
 #include "IncEncoder.h"
 
 static TIM_HandleTypeDef *IncEncHandle;
+extern osMessageQId CDCQueueHandle;
 
 osThreadId IncEncoderProcessTaskHandle;
 static uint32_t IncEncoderProcessTaskBuffer[ 256 ];
@@ -25,7 +25,8 @@ void IncEncoderProcessTask(void const * argument){
 
         vel_cnt_raw = (int32_t)GetCount_raw() - 0x7fffffff;
         IncEncHandle->Instance->CNT = 0x7fffffff;
-        osDelay(1);
+        osMessagePut(CDCQueueHandle, GetVelocity_rpm(), 0);
+        osDelay(10);
     }
 }
 
@@ -43,7 +44,7 @@ uint32_t GetCount_raw(void){
 }
 
 int32_t GetVelocity_rpm(void){
-    return vel_cnt_raw * 1000 * 60 / (2048 * 4);
+    return vel_cnt_raw * 100 * 60 / (2048 * 4);
 }
 /*
 float GetAngle_deg(void){

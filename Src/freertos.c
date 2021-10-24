@@ -48,6 +48,9 @@
 /* USER CODE BEGIN Variables */
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+osMessageQId CDCQueueHandle;
+uint8_t CDCQueueBuffer[ 16 * sizeof( int16_t ) ];
+osStaticMessageQDef_t CDCQueueControlBlock;
 osSemaphoreId RS485transmitSemaphoreHandle;
 osStaticSemaphoreDef_t RS485transmitSemControlBlock;
 
@@ -102,6 +105,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of CDCQueue */
+  osMessageQStaticDef(CDCQueue, 16, int16_t, CDCQueueBuffer, &CDCQueueControlBlock);
+  CDCQueueHandle = osMessageCreate(osMessageQ(CDCQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

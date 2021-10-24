@@ -7,16 +7,22 @@
 
 #include "usb_cdc.h"
 #include "usbd_cdc_if.h"
+#include "stdarg.h"
 
 osThreadId UsbCDC_TransmitTaskHandle;
 static uint32_t UsbCDC_TransmitTaskBuffer[ 256 ];
 static osStaticThreadDef_t UsbCDC_TransmitTaskControlBlock;
 
+extern osMessageQId CDCQueueHandle;
+
 void UsbCDC_TransmitTask(void const * argument){
 
     for(;;)
     {
-
+        osEvent event = osMessageGet(CDCQueueHandle, 0);
+        if(event.status == osEventMessage){
+            com_printf("%ld\r\n", (int16_t)event.value.v);
+        }
     }
 }
 
