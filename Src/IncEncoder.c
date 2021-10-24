@@ -1,33 +1,37 @@
 /*
- *  HEDL5540.c
+ *  IncEncoder.c
  *
- *  Created on: 2018/09/23
- *      Author: Yuki
+ *  Created on: 2021/10/24
+ *      Author: Yuki Kusakabe
  */
 
 #include "cmsis_os.h"
-#include "HEDL5540.h"
+#include "IncEncoder.h"
 
-static TIM_HandleTypeDef *htim_hedl5540;
+static TIM_HandleTypeDef *IncEncHandle;
 
 osThreadId IncEncoderProcessTaskHandle;
 static uint32_t IncEncoderProcessTaskBuffer[ 256 ];
 static  osStaticThreadDef_t IncEncoderProcessTaskControlBlock;
 
+static int32_t vel_cnt_raw = 0;
+
 
 void IncEncoderProcessTask(void const * argument){
 
-    HAL_TIM_Encoder_Start(htim_hedl5540, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(IncEncHandle, TIM_CHANNEL_ALL);
 
     for(;;){
 
-        osDelay(10);
+        vel_cnt_raw = (int32_t)GetCount_raw() - 0x7fffffff;
+        IncEncHandle->Instance->CNT = 0x7fffffff;
+        osDelay(1);
     }
 }
 
-void HEDL5540_Encoder_Init(TIM_HandleTypeDef* htim){
+void IncEncoder_Init(TIM_HandleTypeDef* htim){
 
-    htim_hedl5540 = htim;
+    IncEncHandle = htim;
 
     osThreadStaticDef(incencoderprocessTask, IncEncoderProcessTask, osPriorityNormal, 0, 256, IncEncoderProcessTaskBuffer, &IncEncoderProcessTaskControlBlock);
     IncEncoderProcessTaskHandle = osThreadCreate(osThread(incencoderprocessTask), NULL);
@@ -35,7 +39,11 @@ void HEDL5540_Encoder_Init(TIM_HandleTypeDef* htim){
 }
 
 uint32_t GetCount_raw(void){
-    return  htim_hedl5540->Instance->CNT;
+    return  IncEncHandle->Instance->CNT;
+}
+
+int32_t GetVelocity_rpm(void){
+    return vel_cnt_raw * 1000 * 60 / (2048 * 4);
 }
 /*
 float GetAngle_deg(void){

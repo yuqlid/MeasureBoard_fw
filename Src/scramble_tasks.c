@@ -13,9 +13,9 @@
 #include "rs485.h"
 #include <string.h>
 #include <stdarg.h>
-#include "usbd_cdc_if.h"
+
 #include "cmsis_os.h"
-#include "HEDL5540.h"
+#include "IncEncoder.h"
 
 extern osSemaphoreId RS485transmitSemaphoreHandle;
 
@@ -30,10 +30,6 @@ static osStaticThreadDef_t rs485TransmitTaskControlBlock;
 osThreadId rs485DribbleTaskHandle;
 static uint32_t rs485DribbleTaskBuffer[ 256 ];
 static osStaticThreadDef_t rs485DribbleTaskControlBlock;
-
-osThreadId COMSendTaskHandle;
-static uint32_t COMSendTaskBuffer[ 256 ];
-static osStaticThreadDef_t COMSendTaskControlBlock;
 
 osThreadId EncoderProcessTaskHandle;
 static uint32_t EncoderProcessTaskBuffer[ 256 ];
@@ -122,25 +118,6 @@ void rs485DribbleTask(void const * argument){
     }
 }
 
-void COMSendTask(void const * argument){
-
-    for(;;)
-    {
-        static uint8_t i =0;
-        //MechSpeed_RPM = GetVelcity_RPM();
-        LED_Toggle(LED0);
-        osDelay(10);
-        //MC_Speed_Filter();
-        //com_printf("%5ld,%5ld\r\n", target_speed_rpm, speed_rpm_fil);
-        com_printf("%ld\r\n", GetCount_raw());
-        i++;
-
-        if(i >= 4){
-        //printf("%04d,%04d\n",MechSpeed_RPM, MechSpeed_filterd_RPM);   //RPM Out
-        i =0;
-        }
-    }
-}
 
 void scramble_RegisterTasks(void){
     /*
@@ -152,25 +129,6 @@ void scramble_RegisterTasks(void){
 
     osThreadStaticDef(rs485transmitTask, rs485TransmitTask, osPriorityNormal, 0, 256, rs485TransmitTaskBuffer, &rs485TransmitTaskControlBlock);
     rs485TransmitTaskHandle = osThreadCreate(osThread(rs485transmitTask), NULL);
-
-    osThreadStaticDef(comTask, COMSendTask, osPriorityNormal, 0, 256, COMSendTaskBuffer, &COMSendTaskControlBlock);
-    COMSendTaskHandle = osThreadCreate(osThread(comTask), NULL);
-
-}
-
-void com_printf(const char* format, ...){
-
-    va_list arg;
-    uint8_t len;
-    static char printf_buf[255];
-
-    va_start(arg, format);
-
-    len = vsnprintf(printf_buf, 255, format, arg);
-
-    if(len > 0){
-        CDC_Transmit_FS((uint8_t *)printf_buf, len);
-    }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){

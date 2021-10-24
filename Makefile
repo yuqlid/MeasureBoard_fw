@@ -73,9 +73,9 @@ FreeRTOS_helpers/port_DRN.c \
 FreeRTOS_helpers/heap_useNewlib_ST.c \
 xprintf/xprintf.c \
 src/mps_encoder/MA7xx.c \
-src/HEDL5540.c \
+src/IncEncoder.c \
 src/bms/bq78350.c \
-
+src/usb_cdc.c
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f303xc.s

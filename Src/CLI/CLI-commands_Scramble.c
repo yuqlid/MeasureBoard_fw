@@ -9,6 +9,7 @@
 
 #include "MeasurementBoard_v1.h"
 #include "scramble_tasks.h"
+#include "usb_cdc.h"
 
 extern osThreadId rs485TransmitTaskHandle;
 extern osThreadId rs485DribbleTaskHandle;
@@ -62,13 +63,13 @@ static BaseType_t prvPS485PeriodicCommand( char *pcWriteBuffer, size_t xWriteBuf
         state = false;
         sprintf( pcWriteBuffer, "RS485_periodicSend : False\r\n" );
         osThreadSuspend(rs485TransmitTaskHandle);
-		osThreadSuspend(COMSendTaskHandle);
+		osThreadSuspend(UsbCDC_TransmitTaskHandle);
         LED_Off(LED2);
     }else{
         state = true;
         sprintf( pcWriteBuffer, "RS485_periodicSend : True\r\n" );
         osThreadResume(rs485TransmitTaskHandle);
-		osThreadResume(COMSendTaskHandle);
+		osThreadResume(UsbCDC_TransmitTaskHandle);
     }
     // まだ出力する処理が残ってたらpdTRUEにする．
     xReturn = pdFALSE;

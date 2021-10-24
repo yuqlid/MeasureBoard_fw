@@ -42,10 +42,11 @@
 #include "CLI-commands_bq78350.h"
 #include "CLI-commands_Scramble.h"
 
+#include "usb_cdc.h"
 //#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
-#include "HEDL5540.h"
+#include "IncEncoder.h"
 
 #include "FreeRTOS_CLI.h"
 //#include "UART-interrupt-driven-command-console.h"
@@ -178,15 +179,17 @@ int main(void)
   vRegisterCLICommands();
   //vRegisterbq34z100G1CLICommands();
   //vRegisterMA7xxCLICommands();
-  HEDL5540_Encoder_Init(&htim2);
+  IncEncoder_Init(&htim2);
   //vRegisterEEPROMCLICommands();
   //vRegisterbq769x0CLICommands();
   //vRegisterbq78350CLICommands();
   vRegisterScrambleWheelCLICommands();
   scramble_RegisterTasks();
+  UsbCDC_RegisterTasks();
   
   osThreadSuspend(rs485TransmitTaskHandle);
   osThreadSuspend(rs485DribbleTaskHandle);
+  
   //osThreadSuspend(COMSendTaskHandle);
   //osThreadSuspend(EncoderProcessTaskHandle);
 
