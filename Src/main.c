@@ -158,8 +158,9 @@ int main(void)
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   
-  // USBのリセット
+  // SPI CS
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, SET);
+   // USBのリセット
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, RESET);
   
   setbuf(stdout, NULL );

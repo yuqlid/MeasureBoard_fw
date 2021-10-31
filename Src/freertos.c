@@ -145,10 +145,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-
     osDelay(1);
-    i+=1;
-    //printf("%5d\r\n",i);
   }
   /* USER CODE END StartDefaultTask */
 }

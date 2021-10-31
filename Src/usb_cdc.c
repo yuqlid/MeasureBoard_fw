@@ -19,7 +19,7 @@ void UsbCDC_TransmitTask(void const * argument){
 
     for(;;)
     {
-        osEvent event = osMessageGet(CDCQueueHandle, 0);
+        osEvent event = osMessageGet(CDCQueueHandle, osWaitForever);
         if(event.status == osEventMessage){
             com_printf("%ld\r\n", (int16_t)event.value.v);
         }

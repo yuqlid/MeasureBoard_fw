@@ -26,6 +26,7 @@ void IncEncoderProcessTask(void const * argument){
         vel_cnt_raw = (int32_t)GetCount_raw() - 0x7fffffff;
         IncEncHandle->Instance->CNT = 0x7fffffff;
         osMessagePut(CDCQueueHandle, GetVelocity_rpm(), 0);
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
         osDelay(10);
     }
 }
