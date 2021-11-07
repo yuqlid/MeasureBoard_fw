@@ -25,6 +25,11 @@ void IncEncoderProcessTask(void const * argument){
 
         vel_cnt_raw = (int32_t)GetCount_raw() - 0x7fffffff;
         IncEncHandle->Instance->CNT = 0x7fffffff;
+        /* 
+        メッセージを読むタスクが止まっているとその間タイムアウトまでブロッキングする仕様なのか？
+        今のプログラムの仕様だと，メッセージ読み出してUSBで送信するタスクが動いていない間はメッセージ送信を止めるか，
+        メッセージのバッファがいっぱいになったらうがわきする設定に変えたほうが良さそう
+        */
         osMessagePut(CDCQueueHandle, GetVelocity_rpm(), 0);
         HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
         osDelay(10);
