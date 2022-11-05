@@ -43,7 +43,7 @@
 #include "CLI-commands_Scramble.h"
 
 #include "usb_cdc.h"
-//#include "uart_util_hal.h"
+#include "uart_util_hal.h"
 #include "AMT23.h"
 #include "uart_util_hal.h"
 #include "IncEncoder.h"
@@ -173,7 +173,7 @@ int main(void)
   //HAL_TIM_Base_Start_IT(&htim17);
   //HAL_TIM_Base_Start_IT(&htim16);
   //printf("%8d\n",SamplingFreq_Hz);
-
+  UART_Util_Init(&huart3);
   /* Register two command line commands to show task stats and run time stats
   respectively. */
   vRegisterSampleCLICommands();
@@ -320,14 +320,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+/*
 void printb(uint16_t v) {
   #define CHAR_BIT 8
   uint16_t mask = (int16_t)1 << (sizeof(v) * CHAR_BIT - 1);
   do putch(mask & v ? '1' : '0');
   while (mask >>= 1);
 }
-
+*/
 void MC_Speed_Filter(void){
   
   speed_sum_sp_filt = 0;

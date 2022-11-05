@@ -10,7 +10,7 @@
 #include "uart_util_hal.h"
 #include "cmsis_os.h"
 
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart3;
 static UART_HandleTypeDef *huart_print;
 
 static UART_Buffer print_tx_buf;
@@ -92,7 +92,7 @@ int16_t UART_Util_SendByte(UART_HandleTypeDef *huart, UART_Buffer *buf, uint8_t 
   __enable_irq();
   return ret;
 }
-
+/*
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 
   UART_Buffer *tx_buffer;
@@ -124,7 +124,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
       tx_buffer->pending_size = len;
   }
 }
-
+*/
 
 /**************************************************************************/
 /*!
@@ -145,11 +145,11 @@ uint8_t getch(void)
     else
         return false;
 }
-
+/*
 int __io_putchar(int ch){
     return putch(ch);
 }
-
+*/
 int __io_getchar(void){
     while( msgrx_circ_buf_is_empty(huart_print, &print_rx_index) ){
         //HAL_Delay(1);

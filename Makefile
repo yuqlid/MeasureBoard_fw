@@ -75,7 +75,8 @@ xprintf/xprintf.c \
 src/mps_encoder/MA7xx.c \
 src/IncEncoder.c \
 src/bms/bq78350.c \
-src/usb_cdc.c
+src/usb_cdc.c \
+src/uart_util_hal.c
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f303xc.s

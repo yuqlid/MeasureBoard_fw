@@ -60,7 +60,7 @@ void RS485_Transmit(uint8_t ID, uint8_t addr, uint8_t *TxData, uint8_t size);
 /* Private defines -----------------------------------------------------------*/
 #define TIM17_PERIOD (1000-1)
 #define TIM17_PSC (72-1)
-#define USART3_Baudrate 2000000
+#define USART3_Baudrate 460800
 #define USART1_Baudrate 1000000
 #define TIM16_Period (100-1)
 #define TIM16_Prescaler 7200

@@ -16,6 +16,13 @@
 
 #include "cmsis_os.h"
 #include "IncEncoder.h"
+#include "uart_util_hal.h"
+
+typedef enum{
+  HEAD_1 = 0xFA,
+  HEAD_2 = 0xAF
+}Header_Typedef;
+
 
 extern osSemaphoreId RS485transmitSemaphoreHandle;
 
@@ -26,6 +33,10 @@ int32_t duty = 0;
 osThreadId rs485TransmitTaskHandle;
 static uint32_t rs485TransmitTaskBuffer[ 256 ];
 static osStaticThreadDef_t rs485TransmitTaskControlBlock;
+
+osThreadId rs485ReceiveTaskHandle;
+static uint32_t rs485ReceiveTaskBuffer[ 256 ];
+static osStaticThreadDef_t rs485ReceiveTaskControlBlock;
 
 osThreadId rs485DribbleTaskHandle;
 static uint32_t rs485DribbleTaskBuffer[ 256 ];
@@ -91,6 +102,7 @@ void rs485TransmitTask(void const * argument){
         osDelay(6);
     }
 }
+
 
 // ドリブル用モータへ定周期通信
 void rs485DribbleTask(void const * argument){
